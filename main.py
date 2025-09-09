@@ -1,0 +1,23 @@
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from dotenv import load_dotenv 
+
+load_dotenv()
+
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_method=["*"],
+    allow_headers=["*"]
+)
+
+@app.post("/formspree")
+async def send_form(request: Request):
+    data = await request.json()
+
+    return data
