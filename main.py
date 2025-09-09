@@ -45,16 +45,43 @@ async def send_form(request: Request):
 
     data = await request.json()
     
-    user_data = data["submission"]
+    # user_data = data["submission"]
+    user_data = data
     first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     print(first_name, last_name, email, phone)
 
+    headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
+
     payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
+#     payload= {
+#    "messaging_product": "whatsapp", 
+#    "recipient_type": "individual", 
+#    "to": "32488161192", 
+#     # "to": "32456990051",
+#    "type": "text", 
+#     "text":  {
+#         "body": "Hello, dear customer!"
+#     }
+#     }
+
+    payload = {
+        "to": f"{phone}",
+        "type": "text",
+        "language": "English",
+        "policy": "test",
+        "code": "en",
+        "name": "Hello",
+        "text": {
+            "body": f"Hello {first_name}"
+        },
+        "messaging_product": "whatsapp"
+    }
+
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            "https://waba.360dialog.io/v1/messages",
-            headers= {f"D360-API-KEY: {API_KEY_360}", "Content-Type: application/json"},
+            "https://waba-v2.360dialog.io/messages",
+            headers=headers,
             json=payload
         )
         
