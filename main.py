@@ -56,6 +56,8 @@ async def send_form(request: Request):
             "https://waba.360dialog.io/v1/messages",
             headers= {f"D360-API-KEY: {API_KEY_360}", "Content-Type: application/json"},
             json=payload
-            
         )
+        
+    print(response)
+    print(response.json())
     return {"message": "Webhook received"}
