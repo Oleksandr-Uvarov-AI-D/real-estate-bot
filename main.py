@@ -2,8 +2,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv 
+import os
+import httpx
 
 load_dotenv()
+
+API_KEY_360 = os.getenv("API_KEY_360")
 
 
 app = FastAPI()
@@ -45,4 +49,13 @@ async def send_form(request: Request):
     first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     print(first_name, last_name, email, phone)
+
+    payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://waba.360dialog.io/v1/messages",
+            headers= {f"D360-API-KEY: {API_KEY_360}", "Content-Type: application/json"},
+            json=payload
+            
+        )
     return {"message": "Webhook received"}
