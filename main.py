@@ -45,8 +45,8 @@ async def send_form(request: Request):
 
     data = await request.json()
     
-    # user_data = data["submission"]
-    user_data = data
+    user_data = data["submission"]
+    # user_data = data
     first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     print(first_name, last_name, email, phone)
