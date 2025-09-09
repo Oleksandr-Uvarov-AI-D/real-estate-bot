@@ -31,9 +31,6 @@ def home_chat():
 @app.post("/formspree")
 async def send_form(request: Request):
     print(request)
-    data = await request.json()
-    print(data)
-
     hook_secret = request.headers.get("X-Hook-Secret")
 
     if hook_secret:
