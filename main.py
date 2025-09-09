@@ -30,16 +30,19 @@ def home_chat():
 
 @app.post("/formspree")
 async def send_form(request: Request):
-    print(request)
-    hook_secret = request.headers.get("X-Hook-Secret")
+    # hook_secret = request.headers.get("X-Hook-Secret")
 
-    if hook_secret:
-        return JSONResponse(
-            content={"message": "Webhook verifieed"},
-            headers={"X-Hook-Secret": hook_secret},
-            status_code=200
-        )
+    # if hook_secret:
+    #     return JSONResponse(
+    #         content={"message": "Webhook verifieed"},
+    #         headers={"X-Hook-Secret": hook_secret},
+    #         status_code=200
+    #     )
 
     data = await request.json()
-    print(data)
+    
+    user_data = data["submission"]
+    first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
+
+    print(first_name, last_name, email, phone)
     return {"message": "Webhook received"}
