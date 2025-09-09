@@ -39,7 +39,7 @@ async def send_form(request: Request):
     if hook_secret:
         return JSONResponse(
             content={"message": "Webhook verifieed"},
-            headers={"X-Hook-Secret": hook_secret}
+            headers={"X-Hook-Secret": hook_secret},
             status_code=200
         )
 
