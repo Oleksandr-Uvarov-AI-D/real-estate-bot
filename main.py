@@ -16,8 +16,21 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.get("/health")
+async def root():
+    return {"status": "ok"}
+
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def home():
+    return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
+
+@app.get("/chat", response_class=HTMLResponse)
+def home_chat():
+    return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
+
 @app.post("/formspree")
 async def send_form(request: Request):
     data = await request.json()
 
+    print(data)
     return data
