@@ -47,7 +47,7 @@ async def send_form(request: Request):
     data = await request.json()
     
     # for testing
-    if "submission" in user_data:
+    if "submission" in data:
         user_data = data["submission"]
     else:
         user_data = data
