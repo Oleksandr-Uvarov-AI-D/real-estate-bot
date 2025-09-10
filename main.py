@@ -162,28 +162,26 @@ async def send_message_to_render(request: Request):
         phone_number = value["contacts"][0]["wa_id"]
         message_id = value["messages"][0]["id"]
 
+        # Making sure the same message is not processed
+        # (360 dialog sometimes sends POST requests to the webhook with a previously processed message)
         message_list = (
-        supabase.table("real_estaid_messages")
-        .select("*")
-        .eq("message_id", message_id)
-        .execute()
-        ).data
-
-        print(message_list)
+            supabase.table("real_estaid_messages")
+            .select("*")
+            .eq("message_id", message_id)
+            .execute()
+            ).data
+        
+        if len(message_list) != 0:
+            print("skip")
+            return
 
         if phone_number not in conversations:
             thread_id = create_thread().id
-            conversations[phone_number] = {"thread_id": thread_id, "last_message_time": time.time(), "processed_messages": set()}
+            conversations[phone_number] = {"thread_id": thread_id, "last_message_time": time.time()}
         else:
             conversations[phone_number]["last_message_time"] = time.time()
             thread_id = conversations[phone_number]["thread_id"]
-        
-        if message_id in conversations[phone_number]["processed_messages"]:
-            print("skip")
-            return
-        else:
-            conversations[phone_number]["processed_messages"].add(message_id)
-        
+                
         print(user_message)
         print(phone_number)
 
@@ -193,15 +191,6 @@ async def send_message_to_render(request: Request):
             .execute()
             )
         
-
-        message_list = (
-        supabase.table("real_estaid_messages")
-        .select("*")
-        .eq("message_id", message_id)
-        .execute()
-        ).data
-
-        print(message_list)
 
         await send_message_to_ai(thread_id, phone_number, user_message)
     else:
