@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import httpx
 import requests
+from init_azure import get_agent, make_message, get_message_list, create_thread, run_agent
 
 load_dotenv()
 
@@ -109,8 +110,12 @@ async def send_message(request: Request):
     value = changes[0]["value"]
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
+        phone_number = value["contacts"][0]["wa_id"]
         
+
         print(user_message)
+        print(phone_number)
+        send_message_to_ai(user_message)
     else:
         print("no message")
 
@@ -124,3 +129,7 @@ async def send_message(request: Request):
 
     print(response)
     return response
+
+
+def send_message_to_ai(message):
+    pass
