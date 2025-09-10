@@ -187,7 +187,7 @@ async def send_message_to_render(request: Request):
 
         insert_data = (
             supabase.table("real_estaid_messages")
-            .insert({"message_id": message_id, "message": user_message, "bot_message": False})
+            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "bot_message": False})
             .execute()
             )
         
@@ -216,7 +216,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
     response = (
     supabase.table("real_estaid_messages")
-    .insert({"message_id": None, "message": message_to_insert, "bot_message": True})
+    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "bot_message": True})
     .execute()
     )
 
@@ -229,6 +229,8 @@ async def send_message_to_ai(thread_id, phone_number, message):
 # make sure AI knows what day it is today
 # make sure thread is removed after 24 hours since last user's response (can test for much less time)
     # store the time when the thread was created
+    
+    # right now a thread is closed after a specified time but a user doesn't get a final message
 
 
 
