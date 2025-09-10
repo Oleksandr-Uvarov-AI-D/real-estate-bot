@@ -104,10 +104,10 @@ async def send_message(request: Request):
 
     entry = response["entry"]
     print(entry)
-    changes = entry["changes"]
+    changes = entry[0]["changes"]
     print(changes)
     if "messages" in changes:
-        user_message = entry["messages"][0]["text"]["body"]
+        user_message = changes[0]["messages"][0]["text"]["body"]
         print(user_message)
     else:
         print("no message")
