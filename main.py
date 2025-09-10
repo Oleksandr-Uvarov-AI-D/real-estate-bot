@@ -130,4 +130,5 @@ async def send_message(request: Request):
     #     "Authorization": API_KEY_360
     # })
         
+    print(response)
     return response
