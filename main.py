@@ -13,6 +13,7 @@ API_KEY_360 = os.getenv("API_KEY_360")
 WEBHOOK_360_URL = os.getenv("WEBHOOK_360_URL")
 WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
 
+conversations = {} 
 
 app = FastAPI()
 
@@ -55,7 +56,7 @@ def home_chat():
     return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
 
 @app.post("/formspree")
-async def send_form(request: Request):
+async def send_template_message(request: Request):
     data = await request.json()
     
     # for testing
@@ -65,11 +66,22 @@ async def send_form(request: Request):
         user_data = data
     first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
-    print(first_name, last_name, email, phone)
+    # print(first_name, last_name, email, phone)
 
+    send_message_to_user(phone, f"Hello {first_name}")
+
+    # payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
+        
+    # print(response)
+    # print(response.json())
+
+    # print(await send_message())
+
+    return {"message": "Webhook received"}
+
+
+async def send_message_to_user(phone, message):
     headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
-
-    payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
 
     payload = {
         "to": f"{phone}",
@@ -79,7 +91,7 @@ async def send_form(request: Request):
         "code": "en",
         "name": "Hello",
         "text": {
-            "body": f"Hello {first_name}"
+            "body": message
         },
         "messaging_product": "whatsapp"
     }
@@ -90,17 +102,10 @@ async def send_form(request: Request):
             headers=headers,
             json=payload
         )
-        
-    print(response)
-    print(response.json())
-
-    # print(await send_message())
-
-    return {"message": "Webhook received"}
 
 
 @app.post("/webhooks/whatsapp")
-async def send_message(request: Request):
+async def send_message_to_render(request: Request):
     response = await request.json()
 
     entry = response["entry"]
@@ -111,11 +116,15 @@ async def send_message(request: Request):
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
-        
 
+        if phone_number not in conversations:
+            thread_id = create_thread().id
+            conversations[thread_id] = phone_number
+        
         print(user_message)
         print(phone_number)
-        send_message_to_ai(user_message)
+
+        send_message_to_ai(thread_id, user_message)
     else:
         print("no message")
 
@@ -131,5 +140,16 @@ async def send_message(request: Request):
     return response
 
 
-def send_message_to_ai(message):
-    pass
+def send_message_to_ai(thread_id, message):
+    make_message(thread_id, "user", message)
+
+    messages = get_message_list(thread_id)
+    
+    phone_number = conversations[thread_id]
+
+    for message in reversed(messages):
+        if message.role == "assistant" and message.text_messages:
+            message_to_insert = message.text_messages[-1].text.value
+            break
+
+    send_message_to_user(phone_number, message_to_insert)
