@@ -17,7 +17,7 @@ real_estaid_agent = get_agent()
 
 conversations = {} 
 
-def set_up_a_360_webhook():
+async def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
 
     payload = {
