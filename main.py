@@ -120,13 +120,14 @@ async def send_form(request: Request):
 
 
 @app.post("webhooks/whatsapp")
-async def send_message():
+async def send_message(request: Request):
+    response = await request.json()
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://www.example.com/webhook",
-            headers= {
-        "Authorization": API_KEY_360
-    })
+    # async with httpx.AsyncClient() as client:
+    #     response = await client.post(
+    #         "https://www.example.com/webhook",
+    #         headers= {
+    #     "Authorization": API_KEY_360
+    # })
         
-    return response.json()
+    return response
