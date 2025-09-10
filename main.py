@@ -123,12 +123,19 @@ async def send_message_to_render(request: Request):
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
+        message_id = value["messages"][0]["id"]
 
         if phone_number not in conversations:
             thread_id = create_thread().id
-            conversations[phone_number] = thread_id
+            conversations[phone_number] = {"thread_id": thread_id, "processed_messages": set()}
         else:
             thread_id = conversations[phone_number]
+        
+        if message_id in conversations[phone_number]["processed_messages"]:
+            print("skio")
+            return
+        else:
+            conversations[phone_number]["processed_messages"].add(message_id)
         
         print(user_message)
         print(phone_number)
