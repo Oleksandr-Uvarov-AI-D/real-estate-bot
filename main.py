@@ -121,12 +121,12 @@ async def send_message_to_render(request: Request):
 
         if phone_number not in conversations:
             thread_id = create_thread().id
-            conversations[thread_id] = phone_number
+            conversations[phone_number] = thread_id
         
         print(user_message)
         print(phone_number)
 
-        await send_message_to_ai(thread_id, user_message)
+        await send_message_to_ai(thread_id, phone_number, user_message)
     else:
         print("no message")
 
@@ -142,13 +142,11 @@ async def send_message_to_render(request: Request):
     return response
 
 
-async def send_message_to_ai(thread_id, message):
+async def send_message_to_ai(thread_id, phone_number, message):
     make_message(thread_id, "user", message)
 
     messages = get_message_list(thread_id)
     
-    phone_number = conversations[thread_id]
-
     run_agent(thread_id, real_estaid_agent.id)
 
     for message in reversed(messages):
