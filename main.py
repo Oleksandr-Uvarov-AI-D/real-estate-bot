@@ -149,11 +149,13 @@ async def send_message_to_ai(thread_id, message):
     
     phone_number = conversations[thread_id]
 
+    run_agent(thread_id, real_estaid_agent.id)
+
     for message in reversed(messages):
         if message.role == "assistant" and message.text_messages:
             message_to_insert = message.text_messages[-1].text.value
             break
 
+
     await send_message_to_user(phone_number, message_to_insert)
 
-    run_agent(thread_id, real_estaid_agent.id)
