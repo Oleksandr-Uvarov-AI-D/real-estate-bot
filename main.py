@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv 
 import os
 import httpx
+import requests
 
 load_dotenv()
 
@@ -45,8 +46,8 @@ async def send_form(request: Request):
 
     data = await request.json()
     
-    user_data = data["submission"]
-    # user_data = data
+    # user_data = data["submission"]
+    user_data = data
     first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     print(first_name, last_name, email, phone)
@@ -87,4 +88,42 @@ async def send_form(request: Request):
         
     print(response)
     print(response.json())
+
+
+    # url = "https://waba-v2.360dialog.io/messages"
+    url = "https://waba-v2.360dialog.io/v1/configs/webhook"
+    api_key = API_KEY_360
+
+    payload = {
+        # "url": "http://127.0.0.1:8000/webhooks/whatsapp",
+        "url": "https://real-estate-bot-4dxy.onrender.com/webhooks/whatsapp",
+        # Optional: add headers for basic auth if needed
+        # "headers": {
+        #     "Authorization": "Basic base64encodedUSERPASS"
+        # }
+    }
+    headers = {
+        "D360-API-KEY": api_key,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    print("Status:", response.status_code)
+    print("Response:", response.json())
+
+    # print(await send_message())
+
     return {"message": "Webhook received"}
+
+
+@app.post("webhooks/whatsapp")
+async def send_message():
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://www.example.com/webhook",
+            headers= {
+        "Authorization": API_KEY_360
+    })
+        
+    return response.json()
