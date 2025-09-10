@@ -187,10 +187,10 @@ async def send_message_to_render(request: Request):
         print(user_message)
         print(phone_number)
 
-        response = (
+        insert_data = (
             supabase.table("real_estaid_messages")
             .insert({"message_id": message_id, "message": user_message, "bot_message": False})
-            .execute
+            .execute()
             )
         
 
@@ -228,7 +228,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
     response = (
     supabase.table("real_estaid_messages")
     .insert({"message_id": None, "message": message_to_insert, "bot_message": True})
-    .execute
+    .execute()
     )
 
 
