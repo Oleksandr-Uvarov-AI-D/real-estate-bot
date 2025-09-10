@@ -102,8 +102,12 @@ async def send_form(request: Request):
 async def send_message(request: Request):
     response = await request.json()
 
-    if "messages" in response:
-        user_message = response["messages"][0]["text"]["body"]
+    entry = response["entry"]
+    print(entry)
+    changes = entry["changes"]
+    print(changes)
+    if "messages" in changes:
+        user_message = entry["messages"][0]["text"]["body"]
         print(user_message)
     else:
         print("no message")
