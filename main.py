@@ -6,6 +6,7 @@ import os
 import httpx
 import requests
 from init_azure import get_agent, make_message, get_message_list, create_thread, run_agent
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
@@ -15,17 +16,6 @@ WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
 real_estaid_agent = get_agent()
 
 conversations = {} 
-
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
 
 def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
@@ -42,8 +32,21 @@ def set_up_a_360_webhook():
     print("Status:", response.status_code)
     print("Response:", response.json())
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await set_up_a_360_webhook()
+    yield
 
-set_up_a_360_webhook()
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 @app.get("/health")
 async def root():
