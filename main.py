@@ -32,6 +32,8 @@ def set_up_a_360_webhook():
     print("Status:", response.status_code)
     print("Response:", response.json())
 
+    return response.json
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await set_up_a_360_webhook()
