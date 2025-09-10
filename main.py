@@ -12,8 +12,10 @@ load_dotenv()
 API_KEY_360 = os.getenv("API_KEY_360")
 WEBHOOK_360_URL = os.getenv("WEBHOOK_360_URL")
 WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
+real_estaid_agent = get_agent()
 
 conversations = {} 
+
 
 app = FastAPI()
 
@@ -68,7 +70,7 @@ async def send_template_message(request: Request):
 
     # print(first_name, last_name, email, phone)
 
-    send_message_to_user(phone, f"Hello {first_name}")
+    await send_message_to_user(phone, f"Hello {first_name}")
 
     # payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
         
@@ -124,7 +126,7 @@ async def send_message_to_render(request: Request):
         print(user_message)
         print(phone_number)
 
-        send_message_to_ai(thread_id, user_message)
+        await send_message_to_ai(thread_id, user_message)
     else:
         print("no message")
 
@@ -140,7 +142,7 @@ async def send_message_to_render(request: Request):
     return response
 
 
-def send_message_to_ai(thread_id, message):
+async def send_message_to_ai(thread_id, message):
     make_message(thread_id, "user", message)
 
     messages = get_message_list(thread_id)
@@ -152,4 +154,6 @@ def send_message_to_ai(thread_id, message):
             message_to_insert = message.text_messages[-1].text.value
             break
 
-    send_message_to_user(phone_number, message_to_insert)
+    await send_message_to_user(phone_number, message_to_insert)
+
+    run_agent(thread_id, real_estaid_agent.id)
