@@ -119,7 +119,7 @@ async def send_form(request: Request):
     return {"message": "Webhook received"}
 
 
-@app.post("webhooks/whatsapp")
+@app.post("/webhooks/whatsapp")
 async def send_message(request: Request):
     response = await request.json()
 
