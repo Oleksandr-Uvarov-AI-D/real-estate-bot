@@ -9,6 +9,8 @@ import requests
 load_dotenv()
 
 API_KEY_360 = os.getenv("API_KEY_360")
+WEBHOOK_360_URL = os.getenv("WEBHOOK_360_URL")
+WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
 
 
 app = FastAPI()
@@ -20,6 +22,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+def set_up_a_360_webhook():
+    url = WEBHOOK_360_URL
+
+    payload = {
+        "url": WEBHOOK_RENDER_URL,
+    }
+    headers = {
+        "D360-API-KEY": API_KEY_360,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    print("Status:", response.status_code)
+    print("Response:", response.json())
+
+
+set_up_a_360_webhook()
 
 @app.get("/health")
 async def root():
@@ -35,15 +55,6 @@ def home_chat():
 
 @app.post("/formspree")
 async def send_form(request: Request):
-    # hook_secret = request.headers.get("X-Hook-Secret")
-
-    # if hook_secret:
-    #     return JSONResponse(
-    #         content={"message": "Webhook verifieed"},
-    #         headers={"X-Hook-Secret": hook_secret},
-    #         status_code=200
-    #     )
-
     data = await request.json()
     
     # for testing
@@ -58,16 +69,6 @@ async def send_form(request: Request):
     headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
 
     payload = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone}
-#     payload= {
-#    "messaging_product": "whatsapp", 
-#    "recipient_type": "individual", 
-#    "to": "32488161192", 
-#     # "to": "32456990051",
-#    "type": "text", 
-#     "text":  {
-#         "body": "Hello, dear customer!"
-#     }
-#     }
 
     payload = {
         "to": f"{phone}",
@@ -92,28 +93,6 @@ async def send_form(request: Request):
     print(response)
     print(response.json())
 
-
-    # url = "https://waba-v2.360dialog.io/messages"
-    url = "https://waba-v2.360dialog.io/v1/configs/webhook"
-    api_key = API_KEY_360
-
-    payload = {
-        # "url": "http://127.0.0.1:8000/webhooks/whatsapp",
-        "url": "https://real-estate-bot-4dxy.onrender.com/webhooks/whatsapp",
-        # Optional: add headers for basic auth if needed
-        # "headers": {
-        #     "Authorization": "Basic base64encodedUSERPASS"
-        # }
-    }
-    headers = {
-        "D360-API-KEY": api_key,
-        "Content-Type": "application/json"
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-    print("Status:", response.status_code)
-    print("Response:", response.json())
-
     # print(await send_message())
 
     return {"message": "Webhook received"}
@@ -123,12 +102,19 @@ async def send_form(request: Request):
 async def send_message(request: Request):
     response = await request.json()
 
+    if "messages" in response:
+        user_message = response["messages"][0]["text"]["body"]
+        print(user_message)
+    else:
+        print("no message")
+
     # async with httpx.AsyncClient() as client:
     #     response = await client.post(
     #         "https://www.example.com/webhook",
     #         headers= {
     #     "Authorization": API_KEY_360
     # })
-        
+    
+
     print(response)
     return response
