@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv 
@@ -40,11 +40,11 @@ async def set_up_a_360_webhook():
     print("Status:", response.status_code)
     print("Response:", response.json())
 
-    return response
+    return Response(status_code=200)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await set_up_a_360_webhook()
+    # await set_up_a_360_webhook()
 
     task = asyncio.create_task(save_finished_threads())
     yield
@@ -149,7 +149,7 @@ async def send_template_message(request: Request):
         print(response.status_code, response.text)
         # return response.json()
 
-    return JSONResponse(content={"status": "ok"}, status_code=200)
+    return Response(status_code=200)
 
 
 async def send_message_to_user(phone, message):
@@ -173,7 +173,7 @@ async def send_message_to_user(phone, message):
             json=payload
         )
 
-    return JSONResponse(content={"status": "ok"}, status_code=200)
+    return Response(status_code=200)
 
 
 @app.post("/webhooks/whatsapp")
@@ -226,7 +226,7 @@ async def send_message_to_render(request: Request):
 
     # print(response)
     # return response
-    return JSONResponse(content={"status": "ok"}, status_code=200)
+    return Response(status_code=200)
 
 
 async def send_message_to_ai(thread_id, phone_number, message):
@@ -252,7 +252,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
     await send_message_to_user(phone_number, message_to_insert)
 
-    return JSONResponse(content={"status": "ok"}, status_code=200)
+    return Response(status_code=200)
 
 
 
