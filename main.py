@@ -147,9 +147,9 @@ async def send_template_message(request: Request):
             json=payload
         )
         print(response.status_code, response.text)
-        return response
+        # return response.json()
 
-    return {"message": "Webhook received"}
+    return JSONResponse(content={"status": "ok"}, status_code=200)
 
 
 async def send_message_to_user(phone, message):
@@ -173,11 +173,13 @@ async def send_message_to_user(phone, message):
             json=payload
         )
 
+    return JSONResponse(content={"status": "ok"}, status_code=200)
+
 
 @app.post("/webhooks/whatsapp")
 async def send_message_to_render(request: Request):
     response = await request.json()
-
+    
     entry = response["entry"]
     print(entry)
     changes = entry[0]["changes"]
@@ -223,7 +225,8 @@ async def send_message_to_render(request: Request):
         print("no message")
 
     # print(response)
-    return response
+    # return response
+    return JSONResponse(content={"status": "ok"}, status_code=200)
 
 
 async def send_message_to_ai(thread_id, phone_number, message):
@@ -240,7 +243,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
     message_to_insert = remove_source(message_to_insert)
 
-    response = (
+    insert_message = (
     supabase.table("real_estaid_messages")
     .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "bot"})
     .execute()
@@ -248,6 +251,8 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
 
     await send_message_to_user(phone_number, message_to_insert)
+
+    return JSONResponse(content={"status": "ok"}, status_code=200)
 
 
 
