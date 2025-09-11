@@ -26,7 +26,7 @@ response = requests.get("https://api.cal.com/v2/event-types", headers=headers_ev
 
 
 
-agent_real_estaid, agent_summary, agent_summary_thread = get_agents()
+real_estaid_agent, summary_agent, summary_thread = get_agents()
 
 
 def try_to_make_an_appointment(chatbot_message):

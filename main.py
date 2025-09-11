@@ -23,7 +23,7 @@ load_dotenv()
 API_KEY_360 = os.getenv("API_KEY_360")
 WEBHOOK_360_URL = os.getenv("WEBHOOK_360_URL")
 WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
-real_estaid_agent, summary_agent, summary_agent_thread = get_agents()
+real_estaid_agent, summary_agent, summary_thread = get_agents()
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
@@ -48,23 +48,53 @@ async def set_up_a_360_webhook():
 
     return Response(status_code=200)
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     # await set_up_a_360_webhook()
 
-#     # task = await asyncio.create_task(save_finished_threads())
-#     # task = asyncio.create_task(save_finished_threads())
-#     yield
+# Store the last message's time for each thread.
+ONGOING_THREADS = {}
 
-#     # cleanup on shutdown
-#     task.cancel()
-#     try:
-#         await task
-#     except asyncio.CancelledError:
-#         pass
+# How much time a user has to respond before the chat is archived (in seconds)
+time_limit_user_message = 600
 
-# app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+async def save_finished_threads():
+    while True:
+        # Limit the number of threads to check so that it doesn't take up a lot of time
+        threads_to_check = 4
+        # making a list so that the changes are not made during the iteration
+        threads_to_remove = []
+
+        for thread_id, last_message_time in ONGOING_THREADS.items():
+            if threads_to_check == 0:
+                break
+            
+            time_now = time.time()
+            if time_now - last_message_time > time_limit_user_message:
+                threads_to_remove.append(thread_id)
+
+                make_summary(thread_id)
+
+        threads_to_check -= 1
+        for thread_id in threads_to_remove:
+            ONGOING_THREADS.pop(thread_id, None)
+
+        await asyncio.sleep(600)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # await set_up_a_360_webhook()
+
+    # task = await asyncio.create_task(save_finished_threads())
+    task = asyncio.create_task(save_finished_threads())
+    yield
+
+    # cleanup on shutdown
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+app = FastAPI(lifespan=lifespan)
+# app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -191,6 +221,8 @@ async def send_message_to_render(request: Request):
             today = get_today_date()
             sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie."
             make_message(thread_id, "user", sys_msg)
+
+            run_agent(thread_id, real_estaid_agent.id)
         else:
             thread_id = conversations[phone_number]["thread_id"]
 
@@ -248,7 +280,49 @@ async def send_message_to_ai(thread_id, phone_number, message):
     return Response(status_code=200)
 
 
+def make_summary(thread_id):
+    # Get a conversation in JSON format
+    message_list = (
+        supabase.table("chatbot_data")
+        .select("role, message")
+        .eq("thread_id", thread_id)
+        .execute()
+        ).data
 
+    conversation = "".join(f"{message['role']}: {message['message']}\n" for message in message_list)
+
+    # Preventing from storing an empty conversation (when the user started a dialogue but didn't send anything)
+    if conversation != "":
+
+        # Make a message with conversation as value (summary agent)
+        make_message(summary_thread.id, "user", conversation)
+
+        # Pass the message onto summary agent
+        run = run_agent(summary_thread.id, summary_agent.id)
+
+        insert_chatbot_message(summary_thread.id, "chatbot_summary_data", "summary")
+
+
+
+def insert_chatbot_message(table, message):
+    """Function that gets a chatbot message and
+    inserts it into supabase database."
+    
+    Args:
+        thread_id: thread id of the conversation in question
+        table_name: supabase table to where the data is going to be sent
+        chatbot_type: which chatbot to send the data to
+        msg: optional. If not None, just adds that message to the supabase. Used to store automatic messages (successful/unsuccessful reservation)
+
+    Returns:
+        Dict: A dictionary consisting of the role (assistant/chatbot in this case), the message, and the thread id.
+    """
+
+    insert_message = (
+    supabase.table(table)
+    .insert({message})
+    .execute()
+    )
 
 # 1. make sure AI knows what day it is today
 
