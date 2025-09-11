@@ -122,13 +122,15 @@ async def send_template_message(request: Request):
 
 
     phone_number = phone_number.replace("+", "")
-    conversations[phone_number] = {"thread_id": create_thread().id, "first_name": first_name}
+    thread_id = create_thread().id
+    conversations[phone_number] = {"thread_id": thread_id, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
 
     today = get_today_date()
-    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\nUser: Mijn naam is {first_name}\n"
+    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\n" 
+    + f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}.\n Mijn email is {email} en mijn telefoonnummer is {phone_number}"
 
-    send_message_to_ai(first_msg=sys_msg)
+    make_message(thread_id, "assistant", first_msg=sys_msg)
     return Response(status_code=200)
 
         
