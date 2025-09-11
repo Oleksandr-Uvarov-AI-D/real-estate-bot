@@ -181,9 +181,9 @@ async def send_message_to_render(request: Request):
     response = await request.json()
     
     entry = response["entry"]
-    print(entry)
+    # print(entry)
     changes = entry[0]["changes"]
-    print(changes)
+    # print(changes)
     value = changes[0]["value"]
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
@@ -201,7 +201,7 @@ async def send_message_to_render(request: Request):
         
         if len(message_list) != 0:
             print("skip")
-            return
+            return Response(status_code=200)
 
         if phone_number not in conversations:
             thread_id = create_thread().id
@@ -223,6 +223,8 @@ async def send_message_to_render(request: Request):
         await send_message_to_ai(thread_id, phone_number, user_message)
     else:
         print("no message")
+        return Response(status_code=200)
+
 
     # print(response)
     # return response
