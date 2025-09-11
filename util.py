@@ -1,4 +1,67 @@
 import json
+import datetime 
+
+def get_month_name(number, language):
+    month_name = None
+
+    if number == 1:
+        if language == "en":
+            month_name = "january"
+        else:
+            month_name =  "januari"
+    elif number == 2:
+        if language == "en":
+            month_name = "february"
+        else:
+            month_name = "februari"
+    elif number == 3:
+        if language == "en":
+            month_name = "march"
+        else:
+            month_name = "maart"
+    elif number == 4:
+        month_name = "april"
+    elif number == 5:
+        if language == "en":
+            month_name = "may"
+        else: 
+            month_name = "mei"
+    elif number == 6:
+        if language == "en":
+            month_name = "june"
+        else:
+            month_name = "juni"
+    elif number == 7:
+        if language == "en":
+            month_name = "july"
+        else:
+            month_name = "juli"
+    elif number == 8:
+        if language == "en":
+            month_name = "august"
+        else:
+            month_name = "augustus"
+    elif number == 9:
+        month_name = "september"
+    elif number == 10:
+        if language == "en":
+            month_name = "october"
+        else:
+            month_name = "oktober"
+    elif number == 11:
+        month_name = "november"
+    else:
+        month_name = "december"
+
+
+    # Using this because months are capitalized in English but not in Dutch
+    if language == "en":
+        return month_name.capitalize()
+    return month_name
+
+
+def get_today_date():
+    return (datetime.datetime.now().strftime("%A"), datetime.date.today().isoformat())
 
 def remove_source(s: str):
     start = s.find("【")
