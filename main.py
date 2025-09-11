@@ -46,7 +46,7 @@ async def set_up_a_360_webhook():
 async def lifespan(app: FastAPI):
     # await set_up_a_360_webhook()
 
-    task = asyncio.create_task(save_finished_threads())
+    task = await asyncio.create_task(save_finished_threads())
     yield
 
     # cleanup on shutdown
