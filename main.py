@@ -48,22 +48,23 @@ async def set_up_a_360_webhook():
 
     return Response(status_code=200)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # await set_up_a_360_webhook()
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # await set_up_a_360_webhook()
 
-    # task = await asyncio.create_task(save_finished_threads())
-    task = asyncio.create_task(save_finished_threads())
-    yield
+#     # task = await asyncio.create_task(save_finished_threads())
+#     # task = asyncio.create_task(save_finished_threads())
+#     yield
 
-    # cleanup on shutdown
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
+#     # cleanup on shutdown
+#     task.cancel()
+#     try:
+#         await task
+#     except asyncio.CancelledError:
+#         pass
 
-app = FastAPI(lifespan=lifespan)
+# app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,41 +74,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-time_limit_user_message = 30 # 86400
-
 headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
-
-
-async def save_finished_threads():
-    while True:
-        # Limit the number of threads to check so that it doesn't take up a lot of time
-        threads_to_check = 4
-        # making a list so that the changes are not made during the iteration
-        numbers_to_remove = []
-
-        for phone_number in conversations.keys():
-            print("cleaning up phone number ", phone_number)
-            if threads_to_check == 0:
-                break
-
-            last_message_time = conversations[phone_number]["last_message_time"]
-
-            time_now = time.time()
-            if time_now - last_message_time > time_limit_user_message:
-                print("phone number ran out of time", phone_number)
-                numbers_to_remove.append(phone_number)
-                await send_message_to_user(phone_number, "Het spijt ons, maar de tijd van het gesprek is voorbij. " +
-                                "U kunt ons nogmaals contacteren als u een vraag hebt.")
-            else:
-                print("phone number didnt run out of time", phone_number)
-
-                # make_summary(thread_id)
-
-        threads_to_check -= 1
-        for phone_number in numbers_to_remove:
-            conversations.pop(phone_number, None)
-
-        await asyncio.sleep(30) # 600
 
 
 @app.get("/health")
@@ -118,19 +85,13 @@ async def root():
 def home():
     return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
 
-@app.get("/chat", response_class=HTMLResponse)
-def home_chat():
-    return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
-
 @app.post("/formspree")
 async def send_template_message(request: Request):
     data = await request.json()
     
     if "submission" in data:
         user_data = data["submission"]
-    # for testing    
-    else:
-        user_data = data
+
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     payload = {
@@ -158,11 +119,10 @@ async def send_template_message(request: Request):
             json=payload
         )
         print(response.status_code, response.text)
-        # return response.json()
 
 
     phone_number = phone_number.replace("+", "")
-    conversations[phone_number] = {"thread_id": None, "last_message_time": None, "first_name": first_name}
+    conversations[phone_number] = {"thread_id": create_thread().id, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
 
     today = get_today_date()
@@ -179,7 +139,7 @@ async def send_message_to_user(phone, message):
         "language": "English",
         "policy": "test",
         "code": "en",
-        "name": "Hello",
+        "name": "assistant_response",
         "text": {
             "body": message
         },
@@ -222,18 +182,17 @@ async def send_message_to_render(request: Request):
             return Response(status_code=200)
         
         if phone_number not in conversations:
-            conversations[phone_number] = {"thread_id":  None}
-
-
-        if conversations[phone_number]["thread_id"] == None:
             thread_id = create_thread().id
-            conversations[phone_number]["thread_id"] = thread_id
+            conversations[phone_number] = {"thread_id":  thread_id}
+            # Send a first message (phone number wasn't in conversations, which means a user has just started a conversation)
+            # That is, the user started this conversation by contacting the bot directly without sending a form.
+            today = get_today_date()
+            sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie."
+            make_message(thread_id, "user", sys_msg)
         else:
             thread_id = conversations[phone_number]["thread_id"]
 
-        first_name = conversations[phone_number].get("first_name")
 
-        conversations[phone_number]["last_message_time"] = time.time()
 
         insert_data = (
             supabase.table("real_estaid_messages")
@@ -241,7 +200,7 @@ async def send_message_to_render(request: Request):
             .execute()
             )
         
-        await send_message_to_ai(thread_id, phone_number, user_message, first_name)
+        await send_message_to_ai(thread_id, phone_number, user_message)
 
         
     else:
@@ -251,14 +210,11 @@ async def send_message_to_render(request: Request):
     return Response(status_code=200)
 
 
-async def send_message_to_ai(thread_id=None, phone_number=None, message=None, first_msg=False):
+async def send_message_to_ai(thread_id, phone_number, message):
     print("Sending message to AI with message: ", message)
     make_message(thread_id, "user", message)
     
     run_agent(thread_id, real_estaid_agent.id)
-
-    if first_msg:
-        return
 
     messages = get_message_list(thread_id)
 
