@@ -149,6 +149,7 @@ async def send_template_message(request: Request):
         print(response.status_code, response.text)
         # return response.json()
 
+    conversations[phone_number] = {"thread_id": None, "last_message_time": None, "first_name": first_name}
     return Response(status_code=200)
 
 
@@ -202,25 +203,26 @@ async def send_message_to_render(request: Request):
         if len(message_list) != 0:
             print("skip")
             return Response(status_code=200)
-
-        if phone_number not in conversations:
-            thread_id = create_thread().id
-            conversations[phone_number] = {"thread_id": thread_id, "last_message_time": time.time()}
-        else:
-            conversations[phone_number]["last_message_time"] = time.time()
-            thread_id = conversations[phone_number]["thread_id"]
-                
-        print(user_message)
-        print(phone_number)
-
+        
         insert_data = (
             supabase.table("real_estaid_messages")
             .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
             .execute()
             )
-        
 
-        await send_message_to_ai(thread_id, phone_number, user_message)
+        if conversations[phone_number]["thread_id"] == None:
+            thread_id = create_thread().id
+            conversations[phone_number]["thread_id"] = thread_id
+            first_name = conversations[phone_number]["first_name"]
+            await send_message_to_ai(thread_id, phone_number, user_message, first_name)
+        else:
+            thread_id = conversations[phone_number]["thread_id"]
+            await send_message_to_ai(thread_id, phone_number, user_message)
+
+
+
+        conversations[phone_number]["last_message_time"] = time.time()
+        
     else:
         print("no message")
         return Response(status_code=200)
@@ -231,7 +233,12 @@ async def send_message_to_render(request: Request):
     return Response(status_code=200)
 
 
-async def send_message_to_ai(thread_id, phone_number, message):
+async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
+    if first_name != None:
+        greeting = f"Mijn naam is {first_name}\n"
+        greeting += message
+        message = greeting
+        
     make_message(thread_id, "user", message)
     
     run_agent(thread_id, real_estaid_agent.id)
@@ -265,6 +272,9 @@ async def send_message_to_ai(thread_id, phone_number, message):
     
     # right now a thread is closed after a specified time but a user doesn't get a final message
 
+
+# make the bot know the name of the user
+# connect cal.com
 
 
 # Prompt
