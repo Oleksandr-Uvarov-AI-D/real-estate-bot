@@ -204,12 +204,6 @@ async def send_message_to_render(request: Request):
             print("skip")
             return Response(status_code=200)
         
-        insert_data = (
-            supabase.table("real_estaid_messages")
-            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
-            .execute()
-            )
-
         if phone_number not in conversations:
             conversations[phone_number] = {"thread_id":  None}
 
@@ -225,6 +219,12 @@ async def send_message_to_render(request: Request):
 
 
         conversations[phone_number]["last_message_time"] = time.time()
+
+        insert_data = (
+            supabase.table("real_estaid_messages")
+            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
+            .execute()
+            )
         
     else:
         print("no message")
