@@ -7,7 +7,8 @@ import httpx
 import requests
 from init_azure import get_agent, make_message, get_message_list, create_thread, run_agent
 from contextlib import asynccontextmanager
-from util import remove_source
+from util import remove_source, extract_json
+from cal_com_methods import try_to_make_an_appointment
 from supabase import Client, create_client
 import time
 import asyncio
@@ -262,11 +263,20 @@ async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
             message_to_insert = message.text_messages[-1].text.value
             break
 
-    message_to_insert = remove_source(message_to_insert)
+    try:
+        message_to_insert = extract_json(message_to_insert)
+
+        data = try_to_make_an_appointment({"thred_id": thread_id, "message": message_to_insert})
+
+        message_to_insert = data["message"]
+
+    except ValueError:
+        message_to_insert = remove_source(message_to_insert)
+
 
     insert_message = (
     supabase.table("real_estaid_messages")
-    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "bot"})
+    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "assistant"})
     .execute()
     )
 
