@@ -227,9 +227,6 @@ async def send_message_to_render(request: Request):
             thread_id = conversations[phone_number]["thread_id"]
 
         first_name = conversations[phone_number].get("first_name")
-        await send_message_to_ai(thread_id, phone_number, user_message, first_name)
-
-
 
         conversations[phone_number]["last_message_time"] = time.time()
 
@@ -238,6 +235,9 @@ async def send_message_to_render(request: Request):
             .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
             .execute()
             )
+        
+        await send_message_to_ai(thread_id, phone_number, user_message, first_name)
+
         
     else:
         print("no message")
