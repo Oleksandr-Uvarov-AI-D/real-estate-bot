@@ -137,9 +137,14 @@ def _extract_day_and_time_out_of_data(input_date, language):
 
 def get_days_and_times(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
     response_before_date, response_after_date, language = get_available_slots(event_type_id, target, start, end, tz, language)
+    print(response_after_date)
+    print(response_before_date)
 
     # Get the closest day available to the target (after the target time)
+    print(list(response_after_date.json()))
+    print(list(response_after_date.json()["data"]))
     earliest_day_after_target = list(response_after_date.json()["data"])[0]
+    print(earliest_day_after_target)
     # The closest time to the target (after the target time)
     earliest_time_after_target = response_after_date.json()["data"][earliest_day_after_target][0]["start"]
     day_number_after, month_name_after, formatted_time_after = _extract_day_and_time_out_of_data(earliest_time_after_target, language)
