@@ -266,7 +266,7 @@ async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
     try:
         message_to_insert = extract_json(message_to_insert)
 
-        data = try_to_make_an_appointment({"thred_id": thread_id, "message": message_to_insert})
+        data = try_to_make_an_appointment({"thread_id": thread_id, "message": message_to_insert})
 
         message_to_insert = data["message"]
 
