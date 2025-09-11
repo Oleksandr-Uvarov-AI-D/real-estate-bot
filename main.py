@@ -68,6 +68,9 @@ app.add_middleware(
 
 time_limit_user_message = 30 # 86400
 
+headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
+
+
 async def save_finished_threads():
     while True:
         # Limit the number of threads to check so that it doesn't take up a lot of time
@@ -84,9 +87,8 @@ async def save_finished_threads():
             time_now = time.time()
             if time_now - last_message_time > time_limit_user_message:
                 numbers_to_remove.append(phone_number)
-                print(phone_number, "voorbij")
-
-                await send_message_to_user(phone_number, "voorbij")
+                await send_message_to_user(phone_number, "Het spijt ons, maar de tijd van het gesprek is voorbij. " +
+                                "U kunt ons nogmaals contacteren als u een vraag hebt.")
 
                 # make_summary(thread_id)
 
@@ -113,21 +115,44 @@ def home_chat():
 async def send_template_message(request: Request):
     data = await request.json()
     
-    # for testing
     if "submission" in data:
         user_data = data["submission"]
+    # for testing    
     else:
         user_data = data
-    first_name, last_name, email, phone = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
+    first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
-    await send_message_to_user(phone, f"Hello {first_name}")
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone_number,  
+        "type": "template",
+        "template": {
+            "name": "start_message",  
+            "language": {"code": "nl"},  
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {"type": "text", "text": first_name}  # variable substitution
+                    ]
+                }
+            ]
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://waba-v2.360dialog.io/messages",
+            headers=headers,
+            json=payload
+        )
+        print(response.status_code, response.text)
+        return response
 
     return {"message": "Webhook received"}
 
 
 async def send_message_to_user(phone, message):
-    headers={"D360-API-KEY": API_KEY_360, "Content-Type": "application/json"}
-
     payload = {
         "to": f"{phone}",
         "type": "text",
@@ -197,7 +222,7 @@ async def send_message_to_render(request: Request):
     else:
         print("no message")
 
-    print(response)
+    # print(response)
     return response
 
 
