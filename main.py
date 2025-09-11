@@ -79,6 +79,7 @@ async def save_finished_threads():
         numbers_to_remove = []
 
         for phone_number in conversations.keys():
+            print("cleaning up phone number ", phone_number)
             if threads_to_check == 0:
                 break
 
@@ -86,9 +87,12 @@ async def save_finished_threads():
 
             time_now = time.time()
             if time_now - last_message_time > time_limit_user_message:
+                print("phone number ran out of time", phone_number)
                 numbers_to_remove.append(phone_number)
                 await send_message_to_user(phone_number, "Het spijt ons, maar de tijd van het gesprek is voorbij. " +
                                 "U kunt ons nogmaals contacteren als u een vraag hebt.")
+            else:
+                print("phone number didnt run out of time", phone_number)
 
                 # make_summary(thread_id)
 
@@ -207,7 +211,6 @@ async def send_message_to_render(request: Request):
             print("skip")
             return Response(status_code=200)
         
-        print(conversations[phone_number].get("first_name"), "try 1")
         if phone_number not in conversations:
             conversations[phone_number] = {"thread_id":  None}
         print(conversations[phone_number].get("first_name"), "try 2")
