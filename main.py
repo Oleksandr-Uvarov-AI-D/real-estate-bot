@@ -247,6 +247,8 @@ async def send_message_to_render(request: Request):
 
 
 async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
+    print("Sending message to AI with message: ", message)
+    print(first_name, " <- first name")
     if first_name != None:
         today = get_today_date()
 

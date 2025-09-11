@@ -100,6 +100,7 @@ def get_dates_in_timeframe(event_type_id, start, end, time_zone):
 
 
 def get_available_slots(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
+    print("Get available slots, target date: ", target)
     dt = parse_date(target, tz)
     target = str(dt).replace(" ", "T")
 
