@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import httpx
 import requests
-from init_azure import get_agent, make_message, get_message_list, create_thread, run_agent
+from init_azure import get_agents, make_message, get_message_list, create_thread, run_agent
 from contextlib import asynccontextmanager
 from util import remove_source, extract_json
 from cal_com_methods import try_to_make_an_appointment
@@ -23,7 +23,7 @@ load_dotenv()
 API_KEY_360 = os.getenv("API_KEY_360")
 WEBHOOK_360_URL = os.getenv("WEBHOOK_360_URL")
 WEBHOOK_RENDER_URL = os.getenv("WEBHOOK_RENDER_URL")
-real_estaid_agent = get_agent()
+real_estaid_agent, summary_agent, summary_agent_thread = get_agents()
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
@@ -288,11 +288,14 @@ async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
 
 
 
-# make sure AI knows what day it is today
-# make sure thread is removed after 24 hours since last user's response (can test for much less time)
+# 1. make sure AI knows what day it is today
+
+# 2. make sure thread is removed after 24 hours since last user's response (can test for much less time)
     # store the time when the thread was created
     
     # right now a thread is closed after a specified time but a user doesn't get a final message
+
+# 3. summaries
 
 
 # make the bot know the name of the user

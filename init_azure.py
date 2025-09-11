@@ -16,10 +16,12 @@ project = AIProjectClient(
     endpoint=os.getenv("AI_D_PROJECT_ENDPOINT")
 )
 
-agent_estaid = project.agents.get_agent(os.getenv("REAL_ESTAID_AGENT_ID"))
+estaid_agent = project.agents.get_agent(os.getenv("REAL_ESTAID_AGENT_ID"))
+summary_agent = project.agents.get_agent(os.getenv("REAL_ESTAID_AGENT_ID"))
+summary_agent_thread = project.agents.threads.create()
 
-def get_agent():
-    return agent_estaid
+def get_agents():
+    return estaid_agent, summary_agent, summary_agent_thread
 
 
 def make_message(thread_id, role, input_message):

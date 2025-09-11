@@ -26,7 +26,7 @@ response = requests.get("https://api.cal.com/v2/event-types", headers=headers_ev
 
 
 
-agent_data, agent_summary, agent_summary_thread = get_agents()
+agent_real_estaid, agent_summary, agent_summary_thread = get_agents()
 
 
 def try_to_make_an_appointment(chatbot_message):
@@ -52,7 +52,7 @@ def try_to_make_an_appointment(chatbot_message):
             else: 
                 msg = f"Helaas is dit tijdsbestek niet beschikbaar. De dichtstbijzijnde tijdslots zijn {available_slots[0]} en {available_slots[1]}." 
 
-            run = run_agent(agent_summary_thread.id, agent_summary.id)
+            # run = run_agent(agent_summary_thread.id, agent_summary.id)
 
         return {"role": "assistant", "message": msg, "thread_id": thread_id}
     except (ValueError, json.decoder.JSONDecodeError) as e:
