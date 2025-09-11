@@ -149,6 +149,8 @@ async def send_template_message(request: Request):
         print(response.status_code, response.text)
         # return response.json()
 
+
+    phone_number = phone_number.replace("+", "")
     conversations[phone_number] = {"thread_id": None, "last_message_time": None, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
     return Response(status_code=200)
