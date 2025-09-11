@@ -7,7 +7,7 @@ import httpx
 import requests
 from init_azure import get_agents, make_message, get_message_list, create_thread, run_agent
 from contextlib import asynccontextmanager
-from util import remove_source, extract_json
+from util import remove_source, extract_json, get_today_date
 from cal_com_methods import try_to_make_an_appointment
 from supabase import Client, create_client
 import time
@@ -248,9 +248,13 @@ async def send_message_to_render(request: Request):
 
 async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
     if first_name != None:
-        greeting = f"Mijn naam is {first_name}\n"
-        greeting += message
-        message = greeting
+        today = get_today_date()
+
+        sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\n"
+        greeting = f"User: Mijn naam is {first_name}\n"
+        sys_msg += greeting
+        sys_msg += message
+        message = sys_msg
         
     make_message(thread_id, "user", message)
     
