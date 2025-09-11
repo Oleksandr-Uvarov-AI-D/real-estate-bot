@@ -84,8 +84,9 @@ async def save_finished_threads():
             time_now = time.time()
             if time_now - last_message_time > time_limit_user_message:
                 numbers_to_remove.append(phone_number)
+                print(phone_number, "voorbij")
 
-                send_message_to_user(phone_number, "voorbij")
+                await send_message_to_user(phone_number, "voorbij")
 
                 # make_summary(thread_id)
 
@@ -187,7 +188,7 @@ async def send_message_to_render(request: Request):
 
         insert_data = (
             supabase.table("real_estaid_messages")
-            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "bot_message": False})
+            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
             .execute()
             )
         
@@ -216,7 +217,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
     response = (
     supabase.table("real_estaid_messages")
-    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "bot_message": True})
+    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "bot"})
     .execute()
     )
 
