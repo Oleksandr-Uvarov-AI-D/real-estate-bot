@@ -210,6 +210,9 @@ async def send_message_to_render(request: Request):
             .execute()
             )
 
+        if phone_number not in conversations:
+            conversations[phone_number] = {"thread_id":  None}
+
         if conversations[phone_number]["thread_id"] == None:
             thread_id = create_thread().id
             conversations[phone_number]["thread_id"] = thread_id
