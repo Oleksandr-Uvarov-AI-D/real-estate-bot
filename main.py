@@ -11,6 +11,11 @@ from util import remove_source
 from supabase import Client, create_client
 import time
 import asyncio
+import uvicorn
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
 
 load_dotenv()
 
@@ -189,9 +194,7 @@ async def send_message_to_render(request: Request):
     response = await request.json()
     
     entry = response["entry"]
-    # print(entry)
     changes = entry[0]["changes"]
-    # print(changes)
     value = changes[0]["value"]
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
@@ -238,9 +241,6 @@ async def send_message_to_render(request: Request):
         print("no message")
         return Response(status_code=200)
 
-
-    # print(response)
-    # return response
     return Response(status_code=200)
 
 
