@@ -164,9 +164,14 @@ async def send_template_message(request: Request):
     phone_number = phone_number.replace("+", "")
     conversations[phone_number] = {"thread_id": None, "last_message_time": None, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
+
+    today = get_today_date()
+    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\nUser: Mijn naam is {first_name}\n"
+
+    send_message_to_ai(first_msg=sys_msg)
     return Response(status_code=200)
 
-
+        
 async def send_message_to_user(phone, message):
     payload = {
         "to": f"{phone}",
@@ -246,21 +251,14 @@ async def send_message_to_render(request: Request):
     return Response(status_code=200)
 
 
-async def send_message_to_ai(thread_id, phone_number, message, first_name=None):
+async def send_message_to_ai(thread_id=None, phone_number=None, message=None, first_msg=False):
     print("Sending message to AI with message: ", message)
-    print(first_name, " <- first name")
-    if first_name != None:
-        today = get_today_date()
-
-        sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\n"
-        greeting = f"User: Mijn naam is {first_name}\n"
-        sys_msg += greeting
-        sys_msg += message
-        message = sys_msg
-        
     make_message(thread_id, "user", message)
     
     run_agent(thread_id, real_estaid_agent.id)
+
+    if first_msg:
+        return
 
     messages = get_message_list(thread_id)
 
