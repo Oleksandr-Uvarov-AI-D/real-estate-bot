@@ -150,6 +150,7 @@ async def send_template_message(request: Request):
         # return response.json()
 
     conversations[phone_number] = {"thread_id": None, "last_message_time": None, "first_name": first_name}
+    print(conversations[phone_number]["first_name"])
     return Response(status_code=200)
 
 
@@ -204,17 +205,22 @@ async def send_message_to_render(request: Request):
             print("skip")
             return Response(status_code=200)
         
+        print(conversations[phone_number].get("first_name"), "try 1")
         if phone_number not in conversations:
             conversations[phone_number] = {"thread_id":  None}
+        print(conversations[phone_number].get("first_name"), "try 2")
+
 
         if conversations[phone_number]["thread_id"] == None:
+            print(conversations[phone_number].get("first_name"), "try 3")
+
             thread_id = create_thread().id
             conversations[phone_number]["thread_id"] = thread_id
-            first_name = conversations[phone_number]["first_name"]
-            await send_message_to_ai(thread_id, phone_number, user_message, first_name)
         else:
             thread_id = conversations[phone_number]["thread_id"]
-            await send_message_to_ai(thread_id, phone_number, user_message)
+
+        first_name = conversations[phone_number].get("first_name")
+        await send_message_to_ai(thread_id, phone_number, user_message, first_name)
 
 
 
