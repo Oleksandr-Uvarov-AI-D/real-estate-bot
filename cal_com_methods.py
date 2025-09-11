@@ -76,6 +76,7 @@ def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Br
         "metadata": {"key": "value"}
     }
     response = requests.post(f"https://api.cal.com/v2/bookings", headers=headers, json=payload)
+    print(response.json(), "book cal event")
 
     status_code = response.status_code
     return status_code
