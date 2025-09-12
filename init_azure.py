@@ -17,7 +17,7 @@ project = AIProjectClient(
 )
 
 estaid_agent = project.agents.get_agent(os.getenv("REAL_ESTAID_AGENT_ID"))
-summary_agent = project.agents.get_agent(os.getenv("REAL_ESTAID_AGENT_ID"))
+summary_agent = project.agents.get_agent(os.getenv("AGENT_SUMMARY_ID"))
 summary_agent_thread = project.agents.threads.create()
 
 def get_agents():

@@ -318,15 +318,17 @@ def make_summary(thread_id):
         # Pass the message onto summary agent
         run = run_agent(summary_thread.id, summary_agent.id)
         print("make summary run successful")
+        print(summary_thread.id, "summary thread id")
 
 
-        messages = get_message_list(summary_thread.id)
-        length = len(messages)
+        messages_summary = get_message_list(summary_thread.id)
+        messages_conversation = get_message_list(thread_id)
+        length = len(messages_conversation)
 
         print("make summary messages and length successful")
-
+        print("messages summary", messages_summary)
     
-        for message in reversed(messages):
+        for message in reversed(messages_summary):
              if message.role == "assistant" and message.text_messages:
                 message_to_insert = message.text_messages[-1].text.value
                 break
