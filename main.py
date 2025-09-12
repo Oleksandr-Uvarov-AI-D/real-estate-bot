@@ -253,6 +253,7 @@ async def send_message_to_render(request: Request):
 
 
 async def send_message_to_ai(thread_id, phone_number, message):
+    print(threads_without_summaries, "threads without summaries in send message")
     print("Sending message to AI with message: ", message)
     make_message(thread_id, "user", message)
     
@@ -289,6 +290,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
 
 def make_summary(thread_id):
+    print("executing make summary")
     # Get a conversation in JSON format
     message_list = (
         supabase.table("real_estaid_messages")
@@ -299,6 +301,7 @@ def make_summary(thread_id):
 
     conversation = "".join(f"{message['role']}: {message['message']}\n" for message in message_list)
 
+    print("conversation: ", conversation)
     # Preventing from storing an empty conversation (when the user started a dialogue but didn't send anything)
     if conversation != "":
 
