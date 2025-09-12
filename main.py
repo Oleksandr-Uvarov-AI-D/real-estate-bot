@@ -55,6 +55,7 @@ async def set_up_a_360_webhook():
 summary_update_time = 35
 
 async def update_thread_summaries():
+    print("executing update thread")
     while True:
         # Limit the number of threads to check so that it doesn't take up a lot of time
         summaries_to_check = 4
@@ -63,6 +64,7 @@ async def update_thread_summaries():
             break
 
         for thread_id, last_message in threads_without_summaries.items():
+            print("without summaries for loop")
             if time.time() - last_message > 30:
                 make_summary(thread_id)
                 summaries_to_check -= 1
@@ -76,6 +78,7 @@ async def update_thread_summaries():
             .execute()).data
         
         for summary in summaries:
+            print("supabase for loop")
             last_time_updated = summary["last_time_updated"]
             if time.time() - last_time_updated > summary_update_time:
                 length = len(get_message_list(summary["thread_id"]))
@@ -228,7 +231,7 @@ async def send_message_to_render(request: Request):
             # Send a first message (phone number wasn't in conversations, which means a user has just started a conversation)
             # That is, the user started this conversation by contacting the bot directly without sending a form.
             today = get_today_date()
-            sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie."
+            sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie."
             make_message(thread_id, "user", sys_msg)
 
             run_agent(thread_id, real_estaid_agent.id)
