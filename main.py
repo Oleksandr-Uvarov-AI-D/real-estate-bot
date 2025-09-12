@@ -30,6 +30,7 @@ key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 conversations = {} 
+conversation_data = {}
 
 async def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
@@ -49,41 +50,37 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
-# Store the last message's time for each thread.
-ONGOING_THREADS = {}
+# summary_update_time = 600
+summary_update_time = 35
 
-# How much time a user has to respond before the chat is archived (in seconds)
-time_limit_user_message = 600
-
-async def save_finished_threads():
+async def update_thread_summaries():
     while True:
         # Limit the number of threads to check so that it doesn't take up a lot of time
         threads_to_check = 4
         # making a list so that the changes are not made during the iteration
-        threads_to_remove = []
-
-        for thread_id, last_message_time in ONGOING_THREADS.items():
-            if threads_to_check == 0:
-                break
-            
-            time_now = time.time()
-            if time_now - last_message_time > time_limit_user_message:
-                threads_to_remove.append(thread_id)
-
-                make_summary(thread_id)
+        summaries = (
+            supabase.table("real_estaid_summaries")
+            .select("*")
+            .eq("agent_id", summary_agent.id)
+            .execute()).data
+        
+        for summary in summaries:
+            last_time_updated = summary["last_time_updated"]
+            if time.time() - last_time_updated > summary_update_time:
+                length = len(get_message_list(summary["thread_id"]))
+                if length > summary["length"]:
+                    make_summary(summary["thread_id"])
 
         threads_to_check -= 1
-        for thread_id in threads_to_remove:
-            ONGOING_THREADS.pop(thread_id, None)
 
-        await asyncio.sleep(600)
+        await asyncio.sleep(15)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # await set_up_a_360_webhook()
 
     # task = await asyncio.create_task(save_finished_threads())
-    task = asyncio.create_task(save_finished_threads())
+    task = asyncio.create_task(update_thread_summaries())
     yield
 
     # cleanup on shutdown
@@ -224,9 +221,7 @@ async def send_message_to_render(request: Request):
 
             run_agent(thread_id, real_estaid_agent.id)
         else:
-            thread_id = conversations[phone_number]["thread_id"]
-
-
+            thread_id = conversations[phone_number]["thread_id"]        
 
         insert_data = (
             supabase.table("real_estaid_messages")
@@ -300,43 +295,31 @@ def make_summary(thread_id):
         # Pass the message onto summary agent
         run = run_agent(summary_thread.id, summary_agent.id)
 
-        insert_chatbot_message(summary_thread.id, "chatbot_summary_data", "summary")
-
-
-
-def insert_chatbot_message(table, message):
-    """Function that gets a chatbot message and
-    inserts it into supabase database."
+        messages = get_message_list(summary_thread)
+        length = len(messages)
     
-    Args:
-        thread_id: thread id of the conversation in question
-        table_name: supabase table to where the data is going to be sent
-        chatbot_type: which chatbot to send the data to
-        msg: optional. If not None, just adds that message to the supabase. Used to store automatic messages (successful/unsuccessful reservation)
+        for message in reversed(messages):
+             if message.role == "assistant" and message.text_messages:
+                message_to_insert = message.text_messages[-1].text.value
+                break
+             
+        message_to_insert = extract_json(message_to_insert)
+        message_to_insert["thread_id"] = thread_id
+        message_to_insert["length"] = length
+        message_to_insert["last_time_updated"] = int(time.time())
+        message_to_insert["agent_id"] = summary_agent.id
 
-    Returns:
-        Dict: A dictionary consisting of the role (assistant/chatbot in this case), the message, and the thread id.
-    """
-
-    insert_message = (
-    supabase.table(table)
-    .insert({message})
-    .execute()
-    )
-
-# 1. make sure AI knows what day it is today
-
-# 2. make sure thread is removed after 24 hours since last user's response (can test for much less time)
-    # store the time when the thread was created
-    
-    # right now a thread is closed after a specified time but a user doesn't get a final message
-
-# 3. summaries
+        insert_message = (
+        supabase.table("real_estaid_summaries")
+        .upsert({message_to_insert})
+        .execute()
+        )
 
 
-# make the bot know the name of the user
-# connect cal.com
-
+        
+# summaries
+    # update them once in a while 
+        # need to check if there are new messages (length of the messages list?)
 
 # Prompt
 
