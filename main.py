@@ -51,6 +51,7 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
+# summary_update_time = 7200
 summary_update_time = 600
 
 async def update_thread_summaries():
@@ -190,6 +191,7 @@ async def send_template_message(request: Request):
 
         
 async def send_message_to_user(phone, message):
+    print("send message to user is executed with message", message)
     payload = {
         "to": f"{phone}",
         "type": "text",
