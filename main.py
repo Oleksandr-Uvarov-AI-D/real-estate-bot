@@ -58,18 +58,12 @@ async def update_thread_summaries():
     print("executing update thread")
     while True:
         # Limit the number of threads to check so that it doesn't take up a lot of time
-        summaries_to_check = 4
-
-        if summaries_to_check == 0:
-            await asyncio.sleep(15)
 
         for thread_id, last_message in threads_without_summaries.items():
             print("without summaries for loop")
             if time.time() - last_message > 30:
                 make_summary(thread_id)
-                summaries_to_check -= 1
                 threads_without_summaries.pop(thread_id, None)
-                break
         # making a list so that the changes are not made during the iteration
         summaries = (
             supabase.table("real_estaid_summaries")
@@ -84,8 +78,9 @@ async def update_thread_summaries():
                 length = len(get_message_list(summary["thread_id"]))
                 if length > summary["length"]:
                     make_summary(summary["thread_id"])
-                    summaries_to_check -= 1
-                    break
+
+        await asyncio.sleep(15)
+        
 
 
 @asynccontextmanager
