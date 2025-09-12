@@ -58,6 +58,7 @@ def try_to_make_an_appointment(chatbot_message):
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
     start = parse_date(start)
+    print("book cal, start: ", start)
 
     start = str(start).replace(" ", "T")
     payload = {

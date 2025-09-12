@@ -69,7 +69,7 @@ def parse_date(input_date, time_zone):
     return dt
 
 def get_today_date():
-    return (datetime.datetime.now().strftime("%A"), datetime.datetime.now().strftime("%H:%M"), datetime.date.today().isoformat())
+    return (datetime.datetime.now().strftime("%A"), datetime.datetime.now(ZoneInfo("Europe/Brussels")).strftime("%H:%M:%S"), datetime.date.today().isoformat())
 
 def remove_source(s: str):
     start = s.find("【")
