@@ -61,7 +61,7 @@ async def update_thread_summaries():
         summaries_to_check = 4
 
         if summaries_to_check == 0:
-            break
+            await asyncio.sleep(15)
 
         for thread_id, last_message in threads_without_summaries.items():
             print("without summaries for loop")
@@ -87,7 +87,6 @@ async def update_thread_summaries():
                     summaries_to_check -= 1
                     break
 
-        await asyncio.sleep(15)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
