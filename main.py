@@ -67,6 +67,8 @@ async def update_thread_summaries():
                 threads_without_summaries.pop(thread_id, None)
                 print("popped a thread from without summaries")
         # making a list so that the changes are not made during the iteration
+
+        print("update thread summaries after first for loop")
         summaries = (
             supabase.table("real_estaid_summaries")
             .select("*")
@@ -79,6 +81,8 @@ async def update_thread_summaries():
                 length = len(get_message_list(summary["thread_id"]))
                 if length > summary["length"]:
                     make_summary(summary["thread_id"])
+
+        print("update thread summaries after second for loop")
 
         await asyncio.sleep(15)
         
@@ -309,18 +313,24 @@ def make_summary(thread_id):
 
         # Make a message with conversation as value (summary agent)
         make_message(summary_thread.id, "user", conversation)
+        print("make summary make message successful")
 
         # Pass the message onto summary agent
         run = run_agent(summary_thread.id, summary_agent.id)
+        print("make summary run successful")
+
 
         messages = get_message_list(summary_thread)
         length = len(messages)
+
+        print("make summary messages and length successful")
+
     
         for message in reversed(messages):
              if message.role == "assistant" and message.text_messages:
                 message_to_insert = message.text_messages[-1].text.value
                 break
-             
+                  
         print("message to insert before extarcting", message_to_insert)
         message_to_insert = extract_json(message_to_insert)
         print("message to insert after extarcting", message_to_insert)
