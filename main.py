@@ -56,35 +56,41 @@ summary_update_time = 35
 
 async def update_thread_summaries():
     while True:
-        print("executing update thread")
+        try:
+            print("executing update thread")
 
-        # Limit the number of threads to check so that it doesn't take up a lot of time
+            # Limit the number of threads to check so that it doesn't take up a lot of time
 
-        for thread_id, last_message in threads_without_summaries.items():
-            print("without summaries for loop")
-            if time.time() - last_message > 30:
-                make_summary(thread_id)
-                threads_without_summaries.pop(thread_id, None)
-                print("popped a thread from without summaries")
-        # making a list so that the changes are not made during the iteration
+            for thread_id, last_message in threads_without_summaries.items():
+                print("without summaries for loop")
+                if time.time() - last_message > 30:
+                    await make_summary(thread_id)
+                    threads_without_summaries.pop(thread_id, None)
+                    print("popped a thread from without summaries")
+            # making a list so that the changes are not made during the iteration
 
-        print("update thread summaries after first for loop")
-        summaries = (
-            supabase.table("real_estaid_summaries")
-            .select("*")
-            .execute()).data
-        
-        for summary in summaries:
-            print("supabase for loop")
-            last_time_updated = summary["last_time_updated"]
-            if time.time() - last_time_updated > summary_update_time:
-                length = len(get_message_list(summary["thread_id"]))
-                if length > summary["length"]:
-                    make_summary(summary["thread_id"])
+            print("update thread summaries after first for loop")
+            summaries = (
+                supabase.table("real_estaid_summaries")
+                .select("*")
+                .execute()).data
+            
+            for summary in summaries:
+                print("supabase for loop")
+                last_time_updated = summary["last_time_updated"]
+                if time.time() - last_time_updated > summary_update_time:
+                    length = len(get_message_list(summary["thread_id"]))
+                    if length > summary["length"]:
+                        await make_summary(summary["thread_id"])
 
-        print("update thread summaries after second for loop")
+            print("update thread summaries after second for loop")
 
-        await asyncio.sleep(15)
+            await asyncio.sleep(15)
+
+        except Exception as loop_event:
+            import traceback
+            print(f"Error in update_thread_summaries loop:\n{traceback.format_exc()}")
+            await asyncio.sleep(15)
         
 
 
@@ -293,7 +299,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
     return Response(status_code=200)
 
 
-def make_summary(thread_id):
+async def make_summary(thread_id):
     print("executing make summary")
     # Get a conversation in JSON format
     message_list = (
@@ -346,14 +352,12 @@ def make_summary(thread_id):
 
         insert_message = (
         supabase.table("real_estaid_summaries")
-        .upsert({message_to_insert})
+        .upsert(message_to_insert)
         .execute()
         )
 
         print(insert_message)
 
-
-        
 # summaries
     # update them once in a while 
         # need to check if there are new messages (length of the messages list?)
