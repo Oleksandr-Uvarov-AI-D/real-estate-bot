@@ -51,8 +51,7 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
-# summary_update_time = 600
-summary_update_time = 35
+summary_update_time = 600
 
 async def update_thread_summaries():
     while True:
@@ -86,7 +85,7 @@ async def update_thread_summaries():
                         print("length is greater than summary length", length, summary)
                         await make_summary(summary["thread_id"])
                     else: 
-                        print("length is small than summary length", length, summary)
+                        print("length is equal to summary length")
 
             print("update thread summaries after second for loop")
 
@@ -181,7 +180,9 @@ async def send_template_message(request: Request):
     sys_msg = (f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\n\n"
     f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}.\n Mijn email is {email} en mijn telefoonnummer is {phone_number}")
 
-    make_message(thread_id, "assistant", sys_msg)
+    make_message(thread_id, "user", sys_msg)
+
+    run_agent(thread_id, real_estaid_agent.id)
 
     threads_without_summaries[thread_id] = time.time()
 
@@ -370,3 +371,7 @@ async def make_summary(thread_id):
 # Prompt
 
 # make response shorter
+
+
+# limit thread summary to 100 messages
+# 30 days to remember the user
