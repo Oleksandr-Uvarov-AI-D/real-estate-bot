@@ -168,6 +168,9 @@ async def send_template_message(request: Request):
     f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}.\n Mijn email is {email} en mijn telefoonnummer is {phone_number}")
 
     make_message(thread_id, "assistant", sys_msg)
+
+    threads_without_summaries[thread_id] = time.time()
+
     return Response(status_code=200)
 
         
