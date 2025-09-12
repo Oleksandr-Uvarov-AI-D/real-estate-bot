@@ -55,8 +55,9 @@ async def set_up_a_360_webhook():
 summary_update_time = 35
 
 async def update_thread_summaries():
-    print("executing update thread")
     while True:
+        print("executing update thread")
+
         # Limit the number of threads to check so that it doesn't take up a lot of time
 
         for thread_id, last_message in threads_without_summaries.items():
@@ -64,6 +65,7 @@ async def update_thread_summaries():
             if time.time() - last_message > 30:
                 make_summary(thread_id)
                 threads_without_summaries.pop(thread_id, None)
+                print("popped a thread from without summaries")
         # making a list so that the changes are not made during the iteration
         summaries = (
             supabase.table("real_estaid_summaries")
@@ -287,7 +289,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 def make_summary(thread_id):
     # Get a conversation in JSON format
     message_list = (
-        supabase.table("chatbot_data")
+        supabase.table("real_estaid_messages")
         .select("role, message")
         .eq("thread_id", thread_id)
         .execute()
