@@ -65,3 +65,6 @@ def run_agent(thread_id, agent_id):
     return run
 
 
+
+
+# length = len(get_message_list(summary_agent_thread))

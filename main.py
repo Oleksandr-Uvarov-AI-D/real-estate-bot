@@ -320,7 +320,7 @@ def make_summary(thread_id):
         print("make summary run successful")
 
 
-        messages = get_message_list(summary_thread)
+        messages = get_message_list(summary_thread.id)
         length = len(messages)
 
         print("make summary messages and length successful")

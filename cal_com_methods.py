@@ -57,7 +57,7 @@ def try_to_make_an_appointment(chatbot_message):
             # run = run_agent(agent_summary_thread.id, agent_summary.id)
             run = run_agent(thread_id, real_estaid_agent.id)
 
-            print(get_message_list(thread_id))
+            # print(get_message_list(thread_id))
 
         return {"role": "assistant", "message": msg, "thread_id": thread_id}
     except (ValueError, json.decoder.JSONDecodeError) as e:
@@ -65,7 +65,7 @@ def try_to_make_an_appointment(chatbot_message):
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
     start = parse_date(start, tz)
-    print("book cal, start: ", start)
+    # print("book cal, start: ", start)
 
     start = str(start).replace(" ", "T")
     payload = {
@@ -81,7 +81,7 @@ def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Br
         "metadata": {"key": "value"}
     }
     response = requests.post(f"https://api.cal.com/v2/bookings", headers=headers, json=payload)
-    print(response.json(), "book cal event")
+    # print(response.json(), "book cal event")
 
     status_code = response.status_code
     return status_code
