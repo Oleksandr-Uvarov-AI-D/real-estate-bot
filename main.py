@@ -61,7 +61,9 @@ async def update_thread_summaries():
 
             # Limit the number of threads to check so that it doesn't take up a lot of time
 
-            for thread_id, last_message in threads_without_summaries.items():
+
+            # Turning into list to prevent "dictionary changed size during iteration error"
+            for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
                 if time.time() - last_message > 30:
                     await make_summary(thread_id)
