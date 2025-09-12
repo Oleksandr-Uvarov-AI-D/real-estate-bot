@@ -88,7 +88,7 @@ async def update_thread_summaries():
 async def lifespan(app: FastAPI):
     # await set_up_a_360_webhook()
 
-    # task = await asyncio.create_task(save_finished_threads())
+    # task = asyncio.create_task(save_finished_threads())
     task = asyncio.create_task(update_thread_summaries())
     yield
 
@@ -302,8 +302,10 @@ def make_summary(thread_id):
     conversation = "".join(f"{message['role']}: {message['message']}\n" for message in message_list)
 
     print("conversation: ", conversation)
+    print('conversation is not empty', conversation != "")
     # Preventing from storing an empty conversation (when the user started a dialogue but didn't send anything)
     if conversation != "":
+        print("conversation not empty block start")
 
         # Make a message with conversation as value (summary agent)
         make_message(summary_thread.id, "user", conversation)
@@ -319,10 +321,16 @@ def make_summary(thread_id):
                 message_to_insert = message.text_messages[-1].text.value
                 break
              
+        print("message to insert before extarcting", message_to_insert)
         message_to_insert = extract_json(message_to_insert)
+        print("message to insert after extarcting", message_to_insert)
+
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
+
+        print("message to insert after adding new keys", message_to_insert)
+
 
         insert_message = (
         supabase.table("real_estaid_summaries")
