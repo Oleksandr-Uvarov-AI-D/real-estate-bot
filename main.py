@@ -183,7 +183,7 @@ async def send_template_message(request: Request):
 
     make_message(thread_id, "user", sys_msg)
 
-    run_agent(thread_id, real_estaid_agent.id)
+    # run_agent(thread_id, real_estaid_agent.id) causes the sending of the same template multiple times?
 
     threads_without_summaries[thread_id] = time.time()
 
@@ -377,3 +377,5 @@ async def make_summary(thread_id):
 
 # limit thread summary to 100 messages
 # 30 days to remember the user
+
+# for some reason formspree post was executed multiple times for the same thing even though it's not called anywhere
