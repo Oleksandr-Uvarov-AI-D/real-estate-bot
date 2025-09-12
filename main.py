@@ -70,7 +70,6 @@ async def update_thread_summaries():
         summaries = (
             supabase.table("real_estaid_summaries")
             .select("*")
-            .eq("agent_id", summary_agent.id)
             .execute()).data
         
         for summary in summaries:
@@ -239,7 +238,7 @@ async def send_message_to_render(request: Request):
 
         insert_data = (
             supabase.table("real_estaid_messages")
-            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user"})
+            .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user", "agent_id": real_estaid_agent.id})
             .execute()
             )
         
@@ -279,7 +278,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
     insert_message = (
     supabase.table("real_estaid_messages")
-    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "assistant"})
+    .insert({"message_id": None, "message": message_to_insert, "thread_id": thread_id, "role": "assistant", "agent_id": real_estaid_agent.id})
     .execute()
     )
 
@@ -321,7 +320,6 @@ def make_summary(thread_id):
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
-        message_to_insert["agent_id"] = summary_agent.id
 
         insert_message = (
         supabase.table("real_estaid_summaries")
