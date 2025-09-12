@@ -81,7 +81,10 @@ async def update_thread_summaries():
                 if time.time() - last_time_updated > summary_update_time:
                     length = len(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
+                        print("length is greater than summary length", length, summary)
                         await make_summary(summary["thread_id"])
+                    else: 
+                        print("length is small than summary length", length, summary)
 
             print("update thread summaries after second for loop")
 
