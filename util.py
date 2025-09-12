@@ -1,5 +1,8 @@
 import json
-import datetime 
+import datetime
+from dateutil import parser
+from zoneinfo import ZoneInfo
+
 
 def get_month_name(number, language):
     month_name = None
@@ -59,9 +62,14 @@ def get_month_name(number, language):
         return month_name.capitalize()
     return month_name
 
+def parse_date(input_date, time_zone):
+    dt = parser.isoparse(input_date)
+    dt = dt.replace(tzinfo=ZoneInfo(time_zone))
+
+    return dt
 
 def get_today_date():
-    return (datetime.datetime.now().strftime("%A"), datetime.date.today().isoformat())
+    return (datetime.datetime.now().strftime("%A"), datetime.datetime.now().strftime("%H:%M"), datetime.date.today().isoformat())
 
 def remove_source(s: str):
     start = s.find("【")
@@ -90,3 +98,6 @@ def extract_json(s: str):
     
     json_str = s[start:end+1]
     return json.loads(json_str)
+
+
+print(get_today_date())

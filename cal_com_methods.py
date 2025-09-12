@@ -1,12 +1,10 @@
 import requests
-from util import get_month_name, extract_json
+from util import get_month_name, extract_json, parse_date
 import os
 from dotenv import load_dotenv
 import json
 from init_azure import make_message, run_agent, get_agents
-from dateutil import parser
 from dateutil.relativedelta import relativedelta
-from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -59,10 +57,9 @@ def try_to_make_an_appointment(chatbot_message):
         return {"role": "assistant", "message": message, "thread_id": thread_id}
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
-    dt = parser.isoparse(start)
-    dt = dt.replace(tzinfo=ZoneInfo(tz))
+    start = parse_date(start)
 
-    start = str(dt).replace(" ", "T")
+    start = str(start).replace(" ", "T")
     payload = {
         "start": start,
         "attendee": {
@@ -80,12 +77,6 @@ def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Br
 
     status_code = response.status_code
     return status_code
-
-def parse_date(input_date, time_zone):
-    dt = parser.isoparse(input_date)
-    dt = dt.replace(tzinfo=ZoneInfo(time_zone))
-
-    return dt
 
 def get_dates_in_timeframe(event_type_id, start, end, time_zone):
     params = {

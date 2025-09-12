@@ -31,6 +31,7 @@ supabase: Client = create_client(url, key)
 
 conversations = {} 
 conversation_data = {}
+threads_without_summaries = {}
 
 async def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
@@ -56,7 +57,17 @@ summary_update_time = 35
 async def update_thread_summaries():
     while True:
         # Limit the number of threads to check so that it doesn't take up a lot of time
-        threads_to_check = 4
+        summaries_to_check = 4
+
+        if summaries_to_check == 0:
+            break
+
+        for thread_id, last_message in threads_without_summaries.items():
+            if time.time() - last_message > 30:
+                make_summary(thread_id)
+                summaries_to_check -= 1
+                threads_without_summaries.pop(thread_id, None)
+                break
         # making a list so that the changes are not made during the iteration
         summaries = (
             supabase.table("real_estaid_summaries")
@@ -70,8 +81,8 @@ async def update_thread_summaries():
                 length = len(get_message_list(summary["thread_id"]))
                 if length > summary["length"]:
                     make_summary(summary["thread_id"])
-
-        threads_to_check -= 1
+                    summaries_to_check -= 1
+                    break
 
         await asyncio.sleep(15)
 
@@ -154,7 +165,7 @@ async def send_template_message(request: Request):
     print(conversations[phone_number]["first_name"])
 
     today = get_today_date()
-    sys_msg = (f"System message: Vandaag is {today[0]}, {today[1]}. Gebruik deze datum altijd als referentie\n\n"
+    sys_msg = (f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\n\n"
     f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}.\n Mijn email is {email} en mijn telefoonnummer is {phone_number}")
 
     make_message(thread_id, "assistant", sys_msg)
@@ -213,6 +224,7 @@ async def send_message_to_render(request: Request):
         if phone_number not in conversations:
             thread_id = create_thread().id
             conversations[phone_number] = {"thread_id":  thread_id}
+            threads_without_summaries[thread_id] = time.time()
             # Send a first message (phone number wasn't in conversations, which means a user has just started a conversation)
             # That is, the user started this conversation by contacting the bot directly without sending a form.
             today = get_today_date()
@@ -314,6 +326,8 @@ def make_summary(thread_id):
         .upsert({message_to_insert})
         .execute()
         )
+
+        print(insert_message)
 
 
         
