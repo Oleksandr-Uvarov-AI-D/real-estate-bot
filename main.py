@@ -251,6 +251,7 @@ async def send_message_to_render(request: Request):
     if "messages" in value:
         user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
+        phone_number = phone_number.replace("+", "")
         message_id = value["messages"][0]["id"]
 
         # Making sure the same message is not processed
