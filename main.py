@@ -62,8 +62,8 @@ async def delete_old_conversations():
                 print("Deleting a phone number", phone_number, "from the database.")
                 conversations.pop(phone_number, None)
                 print("Checking that the deletion is successful:", conversations.get(phone_number, None))
-        # asyncio.sleep(86400)
-        asyncio.sleep(300)
+        # await asyncio.sleep(86400)
+        await asyncio.sleep(300)
 
 async def update_thread_summaries():
     # summary_update_time = 7200
