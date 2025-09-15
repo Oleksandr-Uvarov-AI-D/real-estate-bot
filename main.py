@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from util import remove_source, extract_json, get_today_date
 from cal_com_methods import try_to_make_an_appointment
 from supabase import Client, create_client
+from fastapi import BackgroundTasks
 import time
 import asyncio
 import uvicorn
@@ -137,7 +138,7 @@ def home():
     return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
 
 @app.post("/formspree")
-async def send_template_message(request: Request):
+async def receive_user_submission(request: Request, background_tasks: BackgroundTasks):
     data = await request.json()
     
     if "submission" in data:
@@ -145,6 +146,12 @@ async def send_template_message(request: Request):
 
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
+    background_tasks.add_task(handle_formspree_submission(first_name, last_name, email, phone_number))
+    return Response(status_code=200)
+
+
+
+async def handle_formspree_submission(first_name, last_name, email, phone_number):
     payload = {
         "messaging_product": "whatsapp",
         "to": phone_number,  
@@ -186,8 +193,6 @@ async def send_template_message(request: Request):
     # run_agent(thread_id, real_estaid_agent.id) causes the sending of the same template multiple times?
 
     threads_without_summaries[thread_id] = time.time()
-
-    return Response(status_code=200)
 
         
 async def send_message_to_user(phone, message):
