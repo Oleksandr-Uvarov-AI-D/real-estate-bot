@@ -64,7 +64,9 @@ def try_to_make_an_appointment(chatbot_message):
         return {"role": "assistant", "message": message, "thread_id": thread_id}
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
+    print("start before parse date: ", start)
     start = parse_date(start, tz)
+    print("start after parse date: ", start)
     # print("book cal, start: ", start)
 
     start = str(start).replace(" ", "T")
@@ -189,8 +191,3 @@ def get_days_and_times(event_type_id, target, start=None, end=None, tz="Europe/B
     return (f"{day_number_before} {month_name_before}, {formatted_time_before}",
             f"{day_number_after} {month_name_after}, {formatted_time_after}",
             f"{target_day} {target_month_name}, {target_formatted_time}")
-
-
-
-# check js + css on render without html
-# make responses smaller (copy of prompt)

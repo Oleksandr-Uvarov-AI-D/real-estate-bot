@@ -72,6 +72,8 @@ def get_today_date():
     return (datetime.datetime.now().strftime("%A"), datetime.datetime.now(ZoneInfo("Europe/Brussels")).strftime("%H:%M:%S"), datetime.date.today().isoformat())
 
 def remove_source(s: str):
+    """Function that removes sources that AI on Azure mentions when
+    searching for information in attached files."""
     start = s.find("【")
     end = s.rfind("】")
 
@@ -88,6 +90,10 @@ def remove_source(s: str):
 
 
 def extract_json(s: str):
+    """Function that makes sure JSON is extracted even if 
+    AI adds redundant text outside of JSON.
+    
+    Throws a ValueError if no JSON is found."""
     if isinstance(s, dict):
         return s
     

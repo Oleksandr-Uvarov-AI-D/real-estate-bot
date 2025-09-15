@@ -91,23 +91,25 @@ async def update_thread_summaries():
                 .execute()).data
             
             for summary in summaries:
-                print("supabase for loop")
+                # print("supabase for loop")
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > summary_update_time:
-                    print("if successful", time.time() - last_time_updated)
+                    # print("if successful", time.time() - last_time_updated)
                     length = len(get_message_list(summary["thread_id"]))
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
-                        print("length is greater than summary length", length, summary)
-                        print("making summary for message list: ")
+                        # print("length is greater than summary length", length, summary)
+                        # print("making summary for message list: ")
                         print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
                     else: 
-                        print("length is equal to summary length", length, summary["length"])
+                        pass
+                        # print("length is equal to summary length", length, summary["length"])
                 else:
-                    print("if not successful")
+                    pass
+                    # print("if not successful")
 
-            print("update thread summaries after second for loop")
+            # print("update thread summaries after second for loop")
 
             await asyncio.sleep(15)
 
@@ -269,7 +271,7 @@ async def send_message_to_render(request: Request):
             ).data
         
         if len(message_list) != 0:
-            print("skip")
+            # print("skip")
             return Response(status_code=200)
         
         if phone_number not in conversations:
@@ -306,7 +308,7 @@ async def send_message_to_render(request: Request):
 
         
     else:
-        print("no message")
+        # print("no message")
         return Response(status_code=200)
 
     return Response(status_code=200)
@@ -423,5 +425,6 @@ async def make_summary(thread_id):
 
 # update the summary every two hours
 # 30 days to remember the user
+# add documentation to parse_date method: remember what parse_method does in the first place
 
 # for some reason formspree post was executed multiple times for the same thing even though it's not called anywhere
