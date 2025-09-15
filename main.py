@@ -52,10 +52,22 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
-# summary_update_time = 7200
-summary_update_time = 60
+async def delete_old_conversations():
+    # conversation_TTL = 86400 * 30
+    conversation_TTL = 75
+    while True:
+        for phone_number in list(conversations.keys()):
+            last_message_time = conversations[phone_number]["last_message"]
+            if time.time() - last_message_time > conversation_TTL:
+                print("Deleting a phone number", phone_number, "from the database.")
+                conversations.pop(phone_number, None)
+                print("Checking that the deletion is successful:", conversations.get(phone_number, None))
+        # asyncio.sleep(86400)
+        asyncio.sleep(300)
 
 async def update_thread_summaries():
+    # summary_update_time = 7200
+    summary_update_time = 60
     while True:
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
@@ -108,15 +120,19 @@ async def update_thread_summaries():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    task = asyncio.create_task(update_thread_summaries())
+    update_thread = asyncio.create_task(update_thread_summaries())
+    delete_old_convs = asyncio.create_task(delete_old_conversations())
+    tasks = [update_thread, delete_old_convs]
+
     yield
 
     # cleanup on shutdown
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
+    for task in tasks:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 app = FastAPI(lifespan=lifespan)
 
@@ -183,8 +199,7 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
     response_text = extract_json(response.text)
     phone_number = response_text["contacts"][0]["wa_id"]
     thread_id = create_thread().id
-    conversations[phone_number] = {"thread_id": thread_id, "first_name": first_name}
-    print(conversations[phone_number]["first_name"])
+    conversations[phone_number] = {"thread_id": thread_id, "first_name": first_name, "last_message": time.time()}
 
     today = get_today_date()
     sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\nUser: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
@@ -277,8 +292,10 @@ async def send_message_to_render(request: Request):
             )
         else:
             print("phone number IS present in conversations")
-            thread_id = conversations[phone_number]["thread_id"]        
+            thread_id = conversations[phone_number]["thread_id"]    
 
+        conversations[phone_number]["last_message"] = time.time()
+           
         insert_data = (
             supabase.table("real_estaid_messages")
             .insert({"message_id": message_id, "message": user_message, "thread_id": thread_id, "role": "user", "agent_id": real_estaid_agent.id})
@@ -335,6 +352,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 async def make_summary(thread_id):
     print("executing make summary")
     # Get a conversation in JSON format
+    # desc=True to get the last 100 messages
     message_list = (
         supabase.table("real_estaid_messages")
         .select("role, message")
@@ -343,6 +361,11 @@ async def make_summary(thread_id):
         .limit(100)
         .execute()
         ).data
+    
+    # reversing the order because otherwise the first message is the latest
+    # so this way the AI is making a summary of the last 100 messages in 
+    # ascending order
+    message_list = message_list[::-1]
 
     conversation = "".join(f"{message['role']}: {message['message']}\n" for message in message_list)
 
@@ -398,7 +421,7 @@ async def make_summary(thread_id):
 # make response shorter
 
 
-# limit thread summary to 100 messages
+# update the summary every two hours
 # 30 days to remember the user
 
 # for some reason formspree post was executed multiple times for the same thing even though it's not called anywhere
