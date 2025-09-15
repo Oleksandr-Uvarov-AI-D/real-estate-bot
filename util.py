@@ -65,7 +65,6 @@ def get_month_name(number, language):
 def add_timezone_to_date(input_date, time_zone):
     dt = parser.isoparse(input_date)
     dt = dt.replace(tzinfo=ZoneInfo(time_zone))
-    dt = str(dt).replace("", "T")
 
     return dt
 
