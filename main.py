@@ -67,6 +67,7 @@ async def update_thread_summaries():
             for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
                 if time.time() - last_message > 30:
+                    length = len(get_message_list(summary["thread_id"]))
                     await make_summary(thread_id)
                     threads_without_summaries.pop(thread_id, None)
                     print("popped a thread from without summaries")
@@ -341,7 +342,7 @@ async def make_summary(thread_id):
 
         # Pass the message onto summary agent
         run = run_agent(summary_thread.id, summary_agent.id)
-        print("make summary run successful")
+        # print("make summary run successful")
         print(summary_thread.id, "summary thread id")
 
 
@@ -349,23 +350,23 @@ async def make_summary(thread_id):
         messages_conversation = get_message_list(thread_id)
         length = len(messages_conversation)
 
-        print("make summary messages and length successful")
-        print("messages summary", messages_summary)
+        # print("make summary messages and length successful")
+        # print("messages summary", messages_summary)
     
         for message in reversed(messages_summary):
              if message.role == "assistant" and message.text_messages:
                 message_to_insert = message.text_messages[-1].text.value
                 break
                   
-        print("message to insert before extarcting", message_to_insert)
+        # print("message to insert before extarcting", message_to_insert)
         message_to_insert = extract_json(message_to_insert)
-        print("message to insert after extarcting", message_to_insert)
+        # print("message to insert after extarcting", message_to_insert)
 
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
 
-        print("message to insert after adding new keys", message_to_insert)
+        # print("message to insert after adding new keys", message_to_insert)
 
 
         insert_message = (
