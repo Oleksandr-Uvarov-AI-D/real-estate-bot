@@ -66,7 +66,7 @@ async def update_thread_summaries():
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
-                if time.time() - last_message > 45:
+                if time.time() - last_message > 120:
                     length = len(get_message_list(thread_id))
                     if length > 2:
                         print("making summary for message list: ")
@@ -267,6 +267,7 @@ async def send_message_to_render(request: Request):
             return Response(status_code=200)
         
         if phone_number not in conversations:
+            print("phone number is NOT present in conversations")
             thread_id = create_thread().id
             conversations[phone_number] = {"thread_id":  thread_id}
             threads_without_summaries[thread_id] = time.time()
@@ -284,6 +285,7 @@ async def send_message_to_render(request: Request):
             .execute()
             )
         else:
+            print("phone number IS present in conversations")
             thread_id = conversations[phone_number]["thread_id"]        
 
         insert_data = (
