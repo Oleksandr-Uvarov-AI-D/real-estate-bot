@@ -180,7 +180,8 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
         )
         print(response.status_code, response.text)
 
-    phone_number = response.text["contacts"][0]["wa_id"]
+    response_text = extract_json(response.text)
+    phone_number = response_text["contacts"][0]["wa_id"]
     thread_id = create_thread().id
     conversations[phone_number] = {"thread_id": thread_id, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
