@@ -68,12 +68,13 @@ async def update_thread_summaries():
                 print("without summaries for loop")
                 if time.time() - last_message > 30:
                     length = len(get_message_list(summary["thread_id"]))
-                    print("making summary for message list: ")
-                    print(get_message_list(summary["thread_id"]))
+                    if length > 2:
+                        print("making summary for message list: ")
+                        print(get_message_list(summary["thread_id"]))
 
-                    await make_summary(thread_id)
-                    threads_without_summaries.pop(thread_id, None)
-                    print("popped a thread from without summaries")
+                        await make_summary(thread_id)
+                        threads_without_summaries.pop(thread_id, None)
+                        print("popped a thread from without summaries")
             # making a list so that the changes are not made during the iteration
 
             print("update thread summaries after first for loop")
@@ -95,7 +96,7 @@ async def update_thread_summaries():
                         print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
                     else: 
-                        print("length is equal to summary length", length, summary)
+                        print("length is equal to summary length", length, summary["length"])
                 else:
                     print("if not successful")
 
@@ -196,12 +197,14 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
     print(conversations[phone_number]["first_name"])
 
     today = get_today_date()
-    sys_msg = (f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\n\n"
-    f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}.\n Mijn email is {email} en mijn telefoonnummer is {phone_number}")
-
+    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie"
     make_message(thread_id, "user", sys_msg)
-
     run_agent(thread_id, real_estaid_agent.id)
+
+    user_data = f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
+    make_message(thread_id, "user", user_data)
+    run_agent(thread_id, real_estaid_agent.id)
+
 
     threads_without_summaries[thread_id] = time.time()
 
