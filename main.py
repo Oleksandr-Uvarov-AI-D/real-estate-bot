@@ -201,6 +201,12 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
     make_message(thread_id, "user", sys_msg)
     run_agent(thread_id, real_estaid_agent.id)
 
+    insert_message = (
+        supabase.table("real_estaid_messages")
+        .insert({"message_id": None, "message": sys_msg, "thread_id": thread_id, "role": "assistant", "agent_id": real_estaid_agent.id})
+        .execute()
+        )
+
     # user_data = f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
     # make_message(thread_id, "user", user_data)
     # run_agent(thread_id, real_estaid_agent.id)
@@ -271,6 +277,12 @@ async def send_message_to_render(request: Request):
             make_message(thread_id, "user", sys_msg)
 
             run_agent(thread_id, real_estaid_agent.id)
+
+            insert_message = (
+            supabase.table("real_estaid_messages")
+            .insert({"message_id": None, "message": sys_msg, "thread_id": thread_id, "role": "assistant", "agent_id": real_estaid_agent.id})
+            .execute()
+            )
         else:
             thread_id = conversations[phone_number]["thread_id"]        
 
