@@ -68,6 +68,9 @@ async def update_thread_summaries():
                 print("without summaries for loop")
                 if time.time() - last_message > 30:
                     length = len(get_message_list(summary["thread_id"]))
+                    print("making summary for message list: ")
+                    print(get_message_list(summary["thread_id"]))
+
                     await make_summary(thread_id)
                     threads_without_summaries.pop(thread_id, None)
                     print("popped a thread from without summaries")
@@ -85,9 +88,11 @@ async def update_thread_summaries():
                 if time.time() - last_time_updated > summary_update_time:
                     print("if successful", time.time() - last_time_updated)
                     length = len(get_message_list(summary["thread_id"]))
-                    print(get_message_list(summary["thread_id"]))
+                    # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
                         print("length is greater than summary length", length, summary)
+                        print("making summary for message list: ")
+                        print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
                     else: 
                         print("length is equal to summary length", length, summary)
