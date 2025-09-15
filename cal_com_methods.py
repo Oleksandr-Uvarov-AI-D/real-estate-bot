@@ -1,9 +1,9 @@
 import requests
-from util import get_month_name, extract_json, parse_date
+from util import get_month_name, extract_json, add_timezone_to_date
 import os
 from dotenv import load_dotenv
 import json
-from init_azure import make_message, run_agent, get_agents, get_message_list
+from init_azure import make_message, run_agent, get_agents
 from dateutil.relativedelta import relativedelta
 
 load_dotenv()
@@ -65,7 +65,7 @@ def try_to_make_an_appointment(chatbot_message):
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
     print("start before parse date: ", start)
-    start = parse_date(start, tz)
+    start = add_timezone_to_date(start, tz)
     print("start after parse date: ", start)
     # print("book cal, start: ", start)
 
@@ -103,8 +103,7 @@ def get_dates_in_timeframe(event_type_id, start, end, time_zone):
 
 def get_available_slots(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
     print("Get available slots, target date: ", target)
-    dt = parse_date(target, tz)
-    target = str(dt).replace(" ", "T")
+    dt = add_timezone_to_date(target, tz)
 
     if start == None:
         one_month_before = dt - relativedelta(months=1)

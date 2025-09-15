@@ -72,8 +72,9 @@ async def update_thread_summaries():
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
-                print("without summaries for loop")
-                if time.time() - last_message > 120:
+                # print("without summaries for loop")
+                # if time.time() - last_message > 120:
+                if time.time() - last_message > 60:
                     length = len(get_message_list(thread_id))
                     if length > 2:
                         print("making summary for message list: ")
@@ -84,7 +85,7 @@ async def update_thread_summaries():
                         print("popped a thread from without summaries")
             # making a list so that the changes are not made during the iteration
 
-            print("update thread summaries after first for loop")
+            # print("update thread summaries after first for loop")
             summaries = (
                 supabase.table("real_estaid_summaries")
                 .select("*")
@@ -100,7 +101,7 @@ async def update_thread_summaries():
                     if length > summary["length"]:
                         # print("length is greater than summary length", length, summary)
                         # print("making summary for message list: ")
-                        print(get_message_list(summary["thread_id"]))
+                        # print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
                     else: 
                         pass
