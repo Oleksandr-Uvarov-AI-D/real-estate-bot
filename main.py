@@ -228,7 +228,8 @@ async def send_message_to_user(phone, message):
         response = await client.post(
             "https://waba-v2.360dialog.io/messages",
             headers=headers,
-            json=payload
+            json=payload,
+            timeout=30.0
         )
 
     return Response(status_code=200)
