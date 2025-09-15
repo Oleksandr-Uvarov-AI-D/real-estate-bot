@@ -67,10 +67,10 @@ async def update_thread_summaries():
             for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
                 if time.time() - last_message > 30:
-                    length = len(get_message_list(summary["thread_id"]))
+                    length = len(get_message_list(thread_id))
                     if length > 2:
                         print("making summary for message list: ")
-                        print(get_message_list(summary["thread_id"]))
+                        print(get_message_list(thread_id))
 
                         await make_summary(thread_id)
                         threads_without_summaries.pop(thread_id, None)
