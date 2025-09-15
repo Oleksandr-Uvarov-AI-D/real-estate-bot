@@ -53,7 +53,7 @@ async def set_up_a_360_webhook():
 
 
 # summary_update_time = 7200
-summary_update_time = 600
+summary_update_time = 60
 
 async def update_thread_summaries():
     while True:
@@ -66,7 +66,7 @@ async def update_thread_summaries():
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
-                if time.time() - last_message > 30:
+                if time.time() - last_message > 45:
                     length = len(get_message_list(thread_id))
                     if length > 2:
                         print("making summary for message list: ")
@@ -197,13 +197,13 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
     print(conversations[phone_number]["first_name"])
 
     today = get_today_date()
-    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie"
+    sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\nUser: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
     make_message(thread_id, "user", sys_msg)
     run_agent(thread_id, real_estaid_agent.id)
 
-    user_data = f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
-    make_message(thread_id, "user", user_data)
-    run_agent(thread_id, real_estaid_agent.id)
+    # user_data = f"User: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
+    # make_message(thread_id, "user", user_data)
+    # run_agent(thread_id, real_estaid_agent.id)
 
 
     threads_without_summaries[thread_id] = time.time()
