@@ -147,7 +147,7 @@ async def receive_user_submission(request: Request, background_tasks: Background
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
     # background_tasks.add_task(await handle_formspree_submission(first_name, last_name, email, phone_number))
-    background_tasks.add_task(await handle_formspree_submission, first_name, last_name, email, phone_number)
+    background_tasks.add_task(handle_formspree_submission, first_name, last_name, email, phone_number)
     return Response(status_code=200)
 
 
