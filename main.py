@@ -339,6 +339,8 @@ async def make_summary(thread_id):
         supabase.table("real_estaid_messages")
         .select("role, message")
         .eq("thread_id", thread_id)
+        .order("id", desc=True)
+        .limit(100)
         .execute()
         ).data
 
