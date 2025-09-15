@@ -389,6 +389,10 @@ async def make_summary(thread_id):
 
         # print("message to insert after adding new keys", message_to_insert)
 
+        thread_msg = supabase.table("real_estaid_summaries").select("*").eq("thread_id", thread_id).execute().data
+        if len(thread_msg) != 0:
+            message_to_insert["id"] = thread_msg[id]
+
 
         insert_message = (
         supabase.table("real_estaid_summaries")
