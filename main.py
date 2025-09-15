@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv 
 import os
 import httpx
@@ -58,11 +58,6 @@ summary_update_time = 60
 async def update_thread_summaries():
     while True:
         try:
-            print("executing update thread")
-
-            # Limit the number of threads to check so that it doesn't take up a lot of time
-
-
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 print("without summaries for loop")
@@ -113,9 +108,6 @@ async def update_thread_summaries():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # await set_up_a_360_webhook()
-
-    # task = asyncio.create_task(save_finished_threads())
     task = asyncio.create_task(update_thread_summaries())
     yield
 
@@ -127,7 +119,6 @@ async def lifespan(app: FastAPI):
         pass
 
 app = FastAPI(lifespan=lifespan)
-# app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -157,7 +148,6 @@ async def receive_user_submission(request: Request, background_tasks: Background
 
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
-    # background_tasks.add_task(await handle_formspree_submission(first_name, last_name, email, phone_number))
     background_tasks.add_task(handle_formspree_submission, first_name, last_name, email, phone_number)
     return Response(status_code=200)
 
@@ -175,7 +165,7 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
                 {
                     "type": "body",
                     "parameters": [
-                        {"type": "text", "text": first_name}  # variable substitution
+                        {"type": "text", "text": first_name}  # variable substitution for the template on 360dialog.
                     ]
                 }
             ]
@@ -190,8 +180,7 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
         )
         print(response.status_code, response.text)
 
-
-    phone_number = phone_number.replace("+", "")
+    phone_number = response.text["contacts"][0]["wa_id"]
     thread_id = create_thread().id
     conversations[phone_number] = {"thread_id": thread_id, "first_name": first_name}
     print(conversations[phone_number]["first_name"])
@@ -373,26 +362,22 @@ async def make_summary(thread_id):
         messages_summary = get_message_list(summary_thread.id)
         messages_conversation = get_message_list(thread_id)
         length = len(messages_conversation)
-
-        # print("make summary messages and length successful")
-        # print("messages summary", messages_summary)
     
         for message in reversed(messages_summary):
              if message.role == "assistant" and message.text_messages:
                 message_to_insert = message.text_messages[-1].text.value
                 break
                   
-        # print("message to insert before extarcting", message_to_insert)
         message_to_insert = extract_json(message_to_insert)
-        # print("message to insert after extarcting", message_to_insert)
 
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
 
-        # print("message to insert after adding new keys", message_to_insert)
 
         thread_msg = supabase.table("real_estaid_summaries").select("*").eq("thread_id", thread_id).execute().data
+        # If not equal to 0, it means that the summary for this thread already exists
+        # and it's going to be overwritten.
         if len(thread_msg) != 0:
             message_to_insert["id"] = thread_msg[0]["id"]
 
@@ -404,10 +389,6 @@ async def make_summary(thread_id):
         )
 
         print(insert_message)
-
-# summaries
-    # update them once in a while 
-        # need to check if there are new messages (length of the messages list?)
 
 # Prompt
 
