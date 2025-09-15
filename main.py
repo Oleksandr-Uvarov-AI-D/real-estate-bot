@@ -82,12 +82,16 @@ async def update_thread_summaries():
                 print("supabase for loop")
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > summary_update_time:
+                    print("if successful", time.time() - last_time_updated)
                     length = len(get_message_list(summary["thread_id"]))
+                    print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
                         print("length is greater than summary length", length, summary)
                         await make_summary(summary["thread_id"])
                     else: 
-                        print("length is equal to summary length")
+                        print("length is equal to summary length", length, summary)
+                else:
+                    print("if not successful")
 
             print("update thread summaries after second for loop")
 
@@ -191,7 +195,7 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
 
     make_message(thread_id, "user", sys_msg)
 
-    # run_agent(thread_id, real_estaid_agent.id) causes the sending of the same template multiple times?
+    run_agent(thread_id, real_estaid_agent.id)
 
     threads_without_summaries[thread_id] = time.time()
 
