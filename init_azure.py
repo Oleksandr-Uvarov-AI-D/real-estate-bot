@@ -29,6 +29,7 @@ def make_message(thread_id, role, input_message):
     thread_id=thread_id,
     role=role,
     content=input_message)
+    print("make message successful with message", input_message)
 
 
 def get_message_list(thread_id):
