@@ -393,7 +393,7 @@ async def make_summary(thread_id):
 
         thread_msg = supabase.table("real_estaid_summaries").select("*").eq("thread_id", thread_id).execute().data
         if len(thread_msg) != 0:
-            message_to_insert["id"] = thread_msg["id"]
+            message_to_insert["id"] = thread_msg[0]["id"]
 
 
         insert_message = (
