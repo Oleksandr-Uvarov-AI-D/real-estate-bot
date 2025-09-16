@@ -53,7 +53,7 @@ def try_to_make_an_appointment(chatbot_message):
             start = date + "T09:00:00"
             end = date + "T17:00:00"
 
-            timeframes = get_dates_in_timeframe(event_type_id, start, end)
+            timeframes = get_dates_in_timeframe(event_type_id, start, end).json()
             print(timeframes)
             
         else:
