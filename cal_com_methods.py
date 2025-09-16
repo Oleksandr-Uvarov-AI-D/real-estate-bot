@@ -66,9 +66,9 @@ def try_to_make_an_appointment(chatbot_message):
         return {"role": "assistant", "message": message, "thread_id": thread_id}
 
 def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
-    print("start before parse date: ", start)
+    # print("start before parse date: ", start)
     start = add_timezone_to_date(start, tz)
-    print("start after parse date: ", start)
+    # print("start after parse date: ", start)
     # print("book cal, start: ", start)
 
     start = str(start).replace(" ", "T")
@@ -104,7 +104,7 @@ def get_dates_in_timeframe(event_type_id, start, end, time_zone="Europe/Brussels
 
 
 def get_available_slots(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
-    print("Get available slots, target date: ", target)
+    # print("Get available slots, target date: ", target)
     dt = add_timezone_to_date(target, tz)
     start = str(dt).replace(" ", "T")
 
@@ -142,14 +142,14 @@ def _extract_day_and_time_out_of_data(input_date, language):
 
 def get_days_and_times(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
     response_before_date, response_after_date, language = get_available_slots(event_type_id, target, start, end, tz, language)
-    print(response_after_date)
-    print(response_before_date)
+    # print(response_after_date)
+    # print(response_before_date)
 
     # Get the closest day available to the target (after the target time)
-    print(list(response_after_date.json()))
-    print(list(response_after_date.json()["data"]))
+    # print(list(response_after_date.json()))
+    # print(list(response_after_date.json()["data"]))
     earliest_day_after_target = list(response_after_date.json()["data"])[0]
-    print(earliest_day_after_target)
+    # print(earliest_day_after_target)
     # The closest time to the target (after the target time)
     earliest_time_after_target = response_after_date.json()["data"][earliest_day_after_target][0]["start"]
     day_number_after, month_name_after, formatted_time_after = _extract_day_and_time_out_of_data(earliest_time_after_target, language)
@@ -159,8 +159,6 @@ def get_days_and_times(event_type_id, target, start=None, end=None, tz="Europe/B
 
     # Get the closest day available to the target (before the target time)
     data_in_response_before_date = "data" in response_before_date.json()
-    if not data_in_response_before_date:
-        print("no data in response before date.", response_before_date.json())
 
     if len(list(response_before_date.json()["data"])) != 0:
         latest_day_before_target = list(response_before_date.json()["data"])[-1]

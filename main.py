@@ -82,12 +82,12 @@ async def update_thread_summaries():
                 # if time.time() - last_message > 60:
                     length = len(get_message_list(thread_id))
                     if length > 2:
-                        print("making summary for message list: ")
-                        print(get_message_list(thread_id))
+                        # print("making summary for message list: ")
+                        # print(get_message_list(thread_id))
 
                         await make_summary(thread_id)
                         threads_without_summaries.pop(thread_id, None)
-                        print("popped a thread from without summaries")
+                        # print("popped a thread from without summaries")
 
             summaries = (
                 supabase.table("real_estaid_summaries")
@@ -110,12 +110,12 @@ async def update_thread_summaries():
                         # print("summary length successful")
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
-                        print("length is greater than summary length", length, summary["length"])
+                        # print("length is greater than summary length", length, summary["length"])
                         # print("making summary for message list: ")
                         # print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
             
-            print("summary count", count)
+            # print("summary count", count)
 
             # print("update thread summaries after second for loop")
 
@@ -169,7 +169,7 @@ def home():
 async def receive_user_submission(request: Request, background_tasks: BackgroundTasks):
     data = await request.json()
     
-    print(data)
+    # print(data)
     user_data = data["submission"]
 
     key_fields = {k: user_data[k] for k in ["firstName", "lastName", "email", "phone"]}
@@ -340,8 +340,8 @@ async def send_message_to_render(request: Request):
 
 
 async def send_message_to_ai(thread_id, phone_number, message):
-    print(threads_without_summaries, "threads without summaries in send message")
-    print("Sending message to AI with message: ", message)
+    # print(threads_without_summaries, "threads without summaries in send message")
+    # print("Sending message to AI with message: ", message)
     make_message(thread_id, "user", message)
     
     run_agent(thread_id, real_estaid_agent.id)
@@ -400,16 +400,16 @@ async def make_summary(thread_id):
     # print('conversation is not empty', conversation != "")
     # Preventing from storing an empty conversation (when the user started a dialogue but didn't send anything)
     if conversation != "":
-        print("conversation not empty block start")
+        # print("conversation not empty block start")
 
         # Make a message with conversation as value (summary agent)
         make_message(summary_thread.id, "user", conversation)
-        print("make summary make message successful")
+        # print("make summary make message successful")
 
         # Pass the message onto summary agent
         run = run_agent(summary_thread.id, summary_agent.id)
         # print("make summary run successful")
-        print(summary_thread.id, "summary thread id")
+        # print(summary_thread.id, "summary thread id")
 
 
         messages_summary = get_message_list(summary_thread.id)
@@ -441,7 +441,7 @@ async def make_summary(thread_id):
         .execute()
         )
 
-        print(insert_message)
+        # print(insert_message)
 
 # Prompt
 
