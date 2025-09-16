@@ -42,11 +42,16 @@ def try_to_make_an_appointment(chatbot_message):
 
         start, language = message_json["start"], "nl"
         available_slots = get_days_and_times(event_type_id, start, language=language)
+        print("available slots", available_slots)
 
         name, email, phone_number, specific_day = message_json["name"], message_json["email"], message_json["phone_number"]
+        print("variables 1")
         msg = f"Je afspraak voor {available_slots[2]} is succesvol ingepland. We nemen zo spoedig mogelijk contact met je op."
+        print("variables 2")
+
 
         status_code = book_cal_event(name, email, phone_number, start, language, specific_day)
+        print("book cal", status_code)
         if status_code == 400:
             print("status code 400")
             if language == "en":
