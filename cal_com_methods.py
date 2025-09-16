@@ -3,7 +3,7 @@ from util import get_month_name, extract_json, add_timezone_to_date
 import os
 from dotenv import load_dotenv
 import json
-from init_azure import make_message, run_agent, get_agents
+from init_azure import make_message, run_agent, get_agents, get_message_list
 from dateutil.relativedelta import relativedelta
 
 load_dotenv()
@@ -48,6 +48,7 @@ def try_to_make_an_appointment(chatbot_message):
 
         status_code = book_cal_event(name, email, phone_number, start, language, specific_day)
         if status_code == 400:
+            print("status code 400")
             if language == "en":
                 msg = f"We are sorry, but {available_slots[2]} is not available. The closest timeframes available are {available_slots[0]} and {available_slots[1]}."
             else: 
@@ -57,6 +58,7 @@ def try_to_make_an_appointment(chatbot_message):
             make_message(thread_id, "assistant", msg)
             # run = run_agent(agent_summary_thread.id, agent_summary.id)
             run = run_agent(thread_id, real_estaid_agent.id)
+            print(get_message_list(thread_id))
 
             # print(get_message_list(thread_id))
 
