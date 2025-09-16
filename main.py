@@ -260,12 +260,10 @@ async def send_message_to_render(request: Request):
         text_in_messages = "text" in value["messages"][0]
         if not text_in_messages:
             print("text NOT in messages. value['messages'][0]:", value["messages"])
-        else:
-            print("text IN messages. value['messages'][0]:", value["messages"])
-            user_message = value["messages"][0]["text"]["body"]
+            return Response(status_code=200)
 
             
-
+        user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
         phone_number = phone_number.replace("+", "")
         message_id = value["messages"][0]["id"]
