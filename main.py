@@ -224,7 +224,7 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
 
         
 async def send_message_to_user(phone, message):
-    print("send message to user is executed with message", message)
+    # print("send message to user is executed with message", message)
     payload = {
         "to": f"{phone}",
         "type": "text",
@@ -259,7 +259,10 @@ async def send_message_to_render(request: Request):
     if "messages" in value:
         text_in_messages = "text" in value["messages"]
         if not text_in_messages:
-            print("text not in messages. value['messages']:", value["messages"])
+            print("text NOT in messages. value['messages']:", value["messages"])
+        else:
+            print("text IN messages. value['messages']:", value["messages"])
+            
 
         user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
@@ -280,7 +283,7 @@ async def send_message_to_render(request: Request):
             return Response(status_code=200)
         
         if phone_number not in conversations:
-            print("phone number is NOT present in conversations")
+            # print("phone number is NOT present in conversations")
             thread_id = create_thread().id
             conversations[phone_number] = {"thread_id":  thread_id}
             threads_without_summaries[thread_id] = time.time()
@@ -298,7 +301,7 @@ async def send_message_to_render(request: Request):
             .execute()
             )
         else:
-            print("phone number IS present in conversations")
+            # print("phone number IS present in conversations")
             thread_id = conversations[phone_number]["thread_id"]    
 
         conversations[phone_number]["last_message"] = time.time()

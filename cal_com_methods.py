@@ -104,7 +104,7 @@ def get_dates_in_timeframe(event_type_id, start, end, time_zone):
 def get_available_slots(event_type_id, target, start=None, end=None, tz="Europe/Brussels", language="nl"):
     print("Get available slots, target date: ", target)
     dt = add_timezone_to_date(target, tz)
-    start = str(dt).replace("T", "")
+    start = str(dt).replace(" ", "T")
 
     if start == None:
         one_month_before = dt - relativedelta(months=1)
