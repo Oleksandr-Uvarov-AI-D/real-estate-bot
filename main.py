@@ -155,8 +155,8 @@ def home():
 async def receive_user_submission(request: Request, background_tasks: BackgroundTasks):
     data = await request.json()
     
-    if "submission" in data:
-        user_data = data["submission"]
+    print(data)
+    user_data = data["submission"]
 
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
