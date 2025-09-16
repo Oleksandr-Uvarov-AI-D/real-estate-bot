@@ -43,28 +43,16 @@ def try_to_make_an_appointment(chatbot_message):
         start, language = message_json["start"], "nl"
         available_slots = get_days_and_times(event_type_id, start, language=language)
 
-        name, email, phone_number, specific_day = message_json["name"], message_json["email"], message_json["phone_number"], str(message_json["specific_day"])
+        name, email, phone_number, specific_day = message_json["name"], message_json["email"], message_json["phone_number"]
         msg = f"Je afspraak voor {available_slots[2]} is succesvol ingepland. We nemen zo spoedig mogelijk contact met je op."
 
+        status_code = book_cal_event(name, email, phone_number, start, language, specific_day)
+        if status_code == 400:
+            if language == "en":
+                msg = f"We are sorry, but {available_slots[2]} is not available. The closest timeframes available are {available_slots[0]} and {available_slots[1]}."
+            else: 
+                msg = f"Helaas is {available_slots[2]} niet beschikbaar. De dichtstbijzijnde tijdslots zijn {available_slots[0]} en {available_slots[1]}." 
 
-        print("specific_day value", specific_day)
-        if specific_day == "True":
-            date = start.split("T")[0]
-            start = date + "T09:00:00"
-            end = date + "T17:00:00"
-
-            timeframes = get_dates_in_timeframe(event_type_id, start, end).json()
-            print(timeframes)
-            
-        else:
-            status_code = book_cal_event(name, email, phone_number, start, language, specific_day)
-            if status_code == 400:
-                if language == "en":
-                    msg = f"We are sorry, but {available_slots[2]} is not available. The closest timeframes available are {available_slots[0]} and {available_slots[1]}."
-                else: 
-                    msg = f"Helaas is {available_slots[2]} niet beschikbaar. De dichtstbijzijnde tijdslots zijn {available_slots[0]} en {available_slots[1]}." 
-
-            
             
             make_message(thread_id, "assistant", msg)
             # run = run_agent(agent_summary_thread.id, agent_summary.id)
@@ -76,7 +64,7 @@ def try_to_make_an_appointment(chatbot_message):
     except (ValueError, json.decoder.JSONDecodeError) as e:
         return {"role": "assistant", "message": message, "thread_id": thread_id}
 
-def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels", specific_day=False):
+def book_cal_event(name, email, phoneNumber, start, language="nl", tz="Europe/Brussels"):
     print("start before parse date: ", start)
     start = add_timezone_to_date(start, tz)
     print("start after parse date: ", start)
