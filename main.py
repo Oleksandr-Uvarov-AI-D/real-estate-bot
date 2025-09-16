@@ -83,16 +83,13 @@ async def update_thread_summaries():
                         await make_summary(thread_id)
                         threads_without_summaries.pop(thread_id, None)
                         print("popped a thread from without summaries")
-            # making a list so that the changes are not made during the iteration
 
-            # print("update thread summaries after first for loop")
             summaries = (
                 supabase.table("real_estaid_summaries")
                 .select("*")
                 .execute()).data
             
             for summary in summaries:
-                # print("supabase for loop")
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > summary_update_time:
                     # print("if successful", time.time() - last_time_updated)
@@ -103,12 +100,6 @@ async def update_thread_summaries():
                         # print("making summary for message list: ")
                         # print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
-                    else: 
-                        pass
-                        # print("length is equal to summary length", length, summary["length"])
-                else:
-                    pass
-                    # print("if not successful")
 
             # print("update thread summaries after second for loop")
 
