@@ -59,7 +59,7 @@ async def delete_old_conversations():
     # conversation_TTL = 86400 * 30
     conversation_TTL = 100
     while True:
-        print("conversation ttl executed")
+        # print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
             last_message_time = conversations[phone_number]["last_message"]
             if time.time() - last_message_time > conversation_TTL:
@@ -73,7 +73,7 @@ async def update_thread_summaries():
     # summary_update_time = 7200
     summary_update_time = 60
     while True:
-        print("summary update executed")
+        # print("summary update executed")
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
@@ -98,7 +98,13 @@ async def update_thread_summaries():
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > summary_update_time:
                     # print("if successful", time.time() - last_time_updated)
-                    length = len(get_message_list(summary["thread_id"]))
+                    thread_id = summary.get("thread_id", None)
+                    if thread_id == None:
+                        print("thread_id is none for summary", summary)
+                    else:
+                        print("thead_id is not None ", thread_id)
+                        length = len(get_message_list(summary["thread_id"]))
+                        print("summary length successful")
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
                         print("length is greater than summary length", length, summary["length"])
@@ -366,7 +372,7 @@ async def send_message_to_ai(thread_id, phone_number, message):
 
 
 async def make_summary(thread_id):
-    print("executing make summary")
+    # print("executing make summary")
     # Get a conversation in JSON format
     # desc=True to get the last 100 messages
     message_list = (
@@ -385,8 +391,8 @@ async def make_summary(thread_id):
 
     conversation = "".join(f"{message['role']}: {message['message']}\n" for message in message_list)
 
-    print("conversation: ", conversation)
-    print('conversation is not empty', conversation != "")
+    # print("conversation: ", conversation)
+    # print('conversation is not empty', conversation != "")
     # Preventing from storing an empty conversation (when the user started a dialogue but didn't send anything)
     if conversation != "":
         print("conversation not empty block start")
