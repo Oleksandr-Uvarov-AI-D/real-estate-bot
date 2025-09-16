@@ -94,13 +94,16 @@ async def update_thread_summaries():
                 .select("*")
                 .execute()).data
             
+            count = 0 
             for summary in summaries:
+                count += 1
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > summary_update_time:
                     # print("if successful", time.time() - last_time_updated)
                     thread_id = summary.get("thread_id", None)
                     if thread_id == None:
                         print("thread_id is none for summary", summary)
+                        print("summary count (None condition)", count)
                     else:
                         print("thead_id is not None ", thread_id)
                         length = len(get_message_list(summary["thread_id"]))
@@ -111,6 +114,8 @@ async def update_thread_summaries():
                         # print("making summary for message list: ")
                         # print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
+            
+            print("summary count", count)
 
             # print("update thread summaries after second for loop")
 
@@ -448,3 +453,6 @@ async def make_summary(thread_id):
 # add documentation to parse_date method: remember what parse_method does in the first place
 
 # for some reason formspree post was executed multiple times for the same thing even though it's not called anywhere
+
+# check if chatbot doesn't respond when it does'nt know if the appointment is successful
+# check why sometimes summary[thread_id] is None
