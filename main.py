@@ -13,6 +13,8 @@ from supabase import Client, create_client
 from fastapi import BackgroundTasks
 import time
 import asyncio
+import hashlib
+import json
 import uvicorn
 
 if __name__ == "__main__":
@@ -33,6 +35,7 @@ supabase: Client = create_client(url, key)
 conversations = {} 
 conversation_data = {}
 threads_without_summaries = {}
+submissions = {}
 
 async def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
@@ -157,6 +160,17 @@ async def receive_user_submission(request: Request, background_tasks: Background
     
     print(data)
     user_data = data["submission"]
+
+    key_fields = {k: user_data[k] for k in ["firstName", "lastName", "email", "phone"]}
+    submission_hash = hashlib.sha256(json.dumps(key_fields, sort_keys=True).encode()).hexdigest()
+
+    if submission_hash in submissions:
+        time_now = time.time()
+        if time_now - submissions[submission_hash] < 300:
+            return Response(status_code=200)
+    
+    submissions[submission_hash] = time.time()
+
 
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
 
