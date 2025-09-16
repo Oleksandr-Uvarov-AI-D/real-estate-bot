@@ -53,8 +53,8 @@ async def set_up_a_360_webhook():
 
 
 async def delete_old_conversations():
-    conversation_TTL = 86400 * 30
-    # conversation_TTL = 75
+    # conversation_TTL = 86400 * 30
+    conversation_TTL = 75
     while True:
         for phone_number in list(conversations.keys()):
             last_message_time = conversations[phone_number]["last_message"]
@@ -63,17 +63,17 @@ async def delete_old_conversations():
                 conversations.pop(phone_number, None)
                 print("Checking that the deletion is successful:", conversations.get(phone_number, None))
         # await asyncio.sleep(86400)
-        await asyncio.sleep(300)
+        await asyncio.sleep(60)
 
 async def update_thread_summaries():
-    summary_update_time = 7200
-    # summary_update_time = 60
+    # summary_update_time = 7200
+    summary_update_time = 60
     while True:
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 # print("without summaries for loop")
-                if time.time() - last_message > 300:
+                if time.time() - last_message > 75:
                 # if time.time() - last_message > 60:
                     length = len(get_message_list(thread_id))
                     if length > 2:
@@ -96,7 +96,7 @@ async def update_thread_summaries():
                     length = len(get_message_list(summary["thread_id"]))
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
-                        # print("length is greater than summary length", length, summary)
+                        print("length is greater than summary length", length, summary["length"])
                         # print("making summary for message list: ")
                         # print(get_message_list(summary["thread_id"]))
                         await make_summary(summary["thread_id"])
