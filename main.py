@@ -53,8 +53,8 @@ async def set_up_a_360_webhook():
 
 
 async def delete_old_conversations():
-    # conversation_TTL = 86400 * 30
-    conversation_TTL = 75
+    conversation_TTL = 86400 * 30
+    # conversation_TTL = 75
     while True:
         for phone_number in list(conversations.keys()):
             last_message_time = conversations[phone_number]["last_message"]
@@ -66,15 +66,15 @@ async def delete_old_conversations():
         await asyncio.sleep(300)
 
 async def update_thread_summaries():
-    # summary_update_time = 7200
-    summary_update_time = 60
+    summary_update_time = 7200
+    # summary_update_time = 60
     while True:
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 # print("without summaries for loop")
-                # if time.time() - last_message > 120:
-                if time.time() - last_message > 60:
+                if time.time() - last_message > 120:
+                # if time.time() - last_message > 60:
                     length = len(get_message_list(thread_id))
                     if length > 2:
                         print("making summary for message list: ")
@@ -257,6 +257,10 @@ async def send_message_to_render(request: Request):
     changes = entry[0]["changes"]
     value = changes[0]["value"]
     if "messages" in value:
+        text_in_messages = "text" in value["messages"]
+        if not text_in_messages:
+            print("text not in messages. value['messages']:", value["messages"])
+
         user_message = value["messages"][0]["text"]["body"]
         phone_number = value["contacts"][0]["wa_id"]
         phone_number = phone_number.replace("+", "")

@@ -156,6 +156,10 @@ def get_days_and_times(event_type_id, target, start=None, end=None, tz="Europe/B
 
 
     # Get the closest day available to the target (before the target time)
+    data_in_response_before_date = "data" in response_before_date.json()
+    if not data_in_response_before_date:
+        print("no data in response before date.", response_before_date.json())
+
     if len(list(response_before_date.json()["data"])) != 0:
         latest_day_before_target = list(response_before_date.json()["data"])[-1]
         # The closest time to the target (before the target time)
