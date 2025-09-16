@@ -43,7 +43,7 @@ def try_to_make_an_appointment(chatbot_message):
         start, language = message_json["start"], "nl"
         available_slots = get_days_and_times(event_type_id, start, language=language)
 
-        name, email, phone_number, specific_day = message_json["name"], message_json["email"], message_json["phone_number"], message_json["specific_day"]
+        name, email, phone_number, specific_day = message_json["name"], message_json["email"], message_json["phone_number"], str(message_json["specific_day"])
         msg = f"Je afspraak voor {available_slots[2]} is succesvol ingepland. We nemen zo spoedig mogelijk contact met je op."
 
 
