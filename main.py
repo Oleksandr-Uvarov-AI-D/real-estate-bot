@@ -54,8 +54,9 @@ async def set_up_a_360_webhook():
 
 async def delete_old_conversations():
     # conversation_TTL = 86400 * 30
-    conversation_TTL = 75
+    conversation_TTL = 100
     while True:
+        print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
             last_message_time = conversations[phone_number]["last_message"]
             if time.time() - last_message_time > conversation_TTL:
@@ -69,6 +70,7 @@ async def update_thread_summaries():
     # summary_update_time = 7200
     summary_update_time = 60
     while True:
+        print("summary update executed")
         try:
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
@@ -103,12 +105,12 @@ async def update_thread_summaries():
 
             # print("update thread summaries after second for loop")
 
-            await asyncio.sleep(300)
+            await asyncio.sleep(30)
 
         except Exception as loop_event:
             import traceback
             print(f"Error in update_thread_summaries loop:\n{traceback.format_exc()}")
-            await asyncio.sleep(300)
+            await asyncio.sleep(30)
         
 
 
