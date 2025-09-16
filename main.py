@@ -73,7 +73,7 @@ async def update_thread_summaries():
             # Turning into list to prevent "dictionary changed size during iteration error"
             for thread_id, last_message in list(threads_without_summaries.items()):
                 # print("without summaries for loop")
-                if time.time() - last_message > 120:
+                if time.time() - last_message > 300:
                 # if time.time() - last_message > 60:
                     length = len(get_message_list(thread_id))
                     if length > 2:
@@ -112,12 +112,12 @@ async def update_thread_summaries():
 
             # print("update thread summaries after second for loop")
 
-            await asyncio.sleep(15)
+            await asyncio.sleep(300)
 
         except Exception as loop_event:
             import traceback
             print(f"Error in update_thread_summaries loop:\n{traceback.format_exc()}")
-            await asyncio.sleep(15)
+            await asyncio.sleep(300)
         
 
 
