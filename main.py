@@ -11,7 +11,7 @@ from util import remove_source, extract_json, get_today_date
 from cal_com_methods import try_to_make_an_appointment
 from fastapi import BackgroundTasks
 from supabase import Client, create_client
-from supabase_util import check_if_data_exists, toggle_dormant
+from supabase_util import toggle_dormant
 import time
 import asyncio
 import hashlib
