@@ -106,7 +106,7 @@ async def update_thread_summaries():
                         print("summary count (None condition)", count)
                     else:
                         # print("thead_id is not None ", thread_id)
-                        length = len(get_message_list(summary["thread_id"]))
+                        length = len(get_message_list(thread_id))
                         # print("summary length successful")
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
