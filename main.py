@@ -9,8 +9,9 @@ from init_azure import get_agents, make_message, get_message_list, create_thread
 from contextlib import asynccontextmanager
 from util import remove_source, extract_json, get_today_date
 from cal_com_methods import try_to_make_an_appointment
-from supabase import Client, create_client
 from fastapi import BackgroundTasks
+from supabase import Client, create_client
+from supabase_util import check_if_data_exists, toggle_dormant
 import time
 import asyncio
 import hashlib
@@ -31,6 +32,7 @@ real_estaid_agent, summary_agent, summary_thread = get_agents()
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
+
 
 conversations = {} 
 threads_without_summaries = {}
@@ -54,10 +56,11 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
-# conversation_TTL = 86400 * 30
-conversation_TTL = 100
+
 async def delete_old_conversations():
     """Delete a trace of thread_id if the last message of a given conversation was >= 30 days ago."""
+    # conversation_TTL = 86400 * 30
+    conversation_TTL = 100
     while True:
         # print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
@@ -72,6 +75,8 @@ async def delete_old_conversations():
 async def update_thread_summaries():
     # summary_update_time = 7200
     summary_update_time = 60
+    # time_to_get_dormant = 86400
+    time_to_get_dormant = 100
     while True:
         # print("summary update executed")
         try:
@@ -92,20 +97,15 @@ async def update_thread_summaries():
             summaries = (
                 supabase.table("real_estaid_summaries")
                 .select("*")
-                .eq("archived", False)
+                .eq("dormant", False)
                 .execute()).data
             
             count = 0 
             for summary in summaries:
                 last_time_updated = summary["last_time_updated"]
-                if time.time() - last_time_updated > conversation_TTL:
-                    summary_id = summary["id"]
-                    response = (
-                        supabase.table("real_estaid_summaries")
-                        .update({"archived": True})
-                        .eq("id", summary_id)
-                        .execute()) 
-
+                if time.time() - last_time_updated > time_to_get_dormant:
+                    summary_thread_id = summary["thread_id"]
+                    toggle_dormant("real_estaid_summaries", summary_thread_id, "True")
 
                 count += 1
                 if time.time() - last_time_updated > summary_update_time:
@@ -339,6 +339,8 @@ async def send_message_to_render(request: Request):
             .execute()
             )
         
+        toggle_dormant("real_estaid_summaries", thread_id, False)
+        
         await send_message_to_ai(thread_id, phone_number, user_message)
 
         
@@ -436,7 +438,7 @@ async def make_summary(thread_id):
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
-        message_to_insert["archived"] = False
+        message_to_insert["dormant"] = False
 
 
         thread_msg = supabase.table("real_estaid_summaries").select("*").eq("thread_id", thread_id).execute().data
@@ -444,6 +446,7 @@ async def make_summary(thread_id):
         # and it's going to be overwritten.
         if len(thread_msg) != 0:
             message_to_insert["id"] = thread_msg[0]["id"]
+            message_to_insert["dormant"] = thread_msg[0]["dormant"]
 
 
         insert_message = (
@@ -465,5 +468,21 @@ async def make_summary(thread_id):
 
 # for some reason formspree post was executed multiple times for the same thing even though it's not called anywhere
 
-# check if chatbot doesn't respond when it does'nt know if the appointment is successful
-# check why sometimes summary[thread_id] is None
+# check why sometimes summary[thread_id] is None -> the error is confusing; it was due to getting messages in the middle of processing another one?
+
+
+# dormant idea
+# the user has 24 hours to text
+    
+
+# 1. get supabase summaries (dormant=False)
+# 2. for summary, if summary last_time_update > 24 hours:
+    # make_summary, set dormant=True
+
+
+# however, if the user replies again, set the summary dormant=False
+    # need to check if summary exists first: len((select supabase where thread_id = thread_id)) != 1
+
+
+
+# toggle_dormant function in supabase_commands.py?
