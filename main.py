@@ -100,35 +100,17 @@ async def update_thread_summaries():
                 .eq("dormant", False)
                 .execute()).data
             
-            count = 0 
             for summary in summaries:
                 last_time_updated = summary["last_time_updated"]
-                if time.time() - last_time_updated > time_to_get_dormant:
+
+                if time.time() - last_time_updated > summary_update_time:
                     summary_thread_id = summary["thread_id"]
                     toggle_dormant("real_estaid_summaries", summary_thread_id, "True")
 
-                count += 1
-                if time.time() - last_time_updated > summary_update_time:
-                    # print("if successful", time.time() - last_time_updated)
-                    thread_id = summary.get("thread_id", None)
-                    if thread_id == None:
-                        print("thread_id is none for summary", summary)
-                        print("summary count (None condition)", count)
-                    else:
-                        # print("thead_id is not None ", thread_id)
-                        length = len(await get_message_list(thread_id))
-                        # print("summary length successful")
-                    # print(get_message_list(summary["thread_id"]))
+                    length = len(await get_message_list(summary_thread_id))
                     if length > summary["length"]:
-                        # print("length is greater than summary length", length, summary["length"])
-                        # print("making summary for message list: ")
-                        # print(get_message_list(summary["thread_id"]))
-                        await make_summary(summary["thread_id"])
+                        await make_summary(summary_thread_id)
             
-            # print("summary count", count)
-
-            # print("update thread summaries after second for loop")
-
             await asyncio.sleep(30)
 
         except Exception as loop_event:
