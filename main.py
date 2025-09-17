@@ -80,7 +80,7 @@ async def update_thread_summaries():
                 # print("without summaries for loop")
                 if time.time() - last_message > 75:
                 # if time.time() - last_message > 60:
-                    length = await len(get_message_list(thread_id))
+                    length = len(await get_message_list(thread_id))
                     if length > 2:
                         # print("making summary for message list: ")
                         # print(get_message_list(thread_id))
@@ -106,7 +106,7 @@ async def update_thread_summaries():
                         print("summary count (None condition)", count)
                     else:
                         # print("thead_id is not None ", thread_id)
-                        length = await len(get_message_list(thread_id))
+                        length = len(await get_message_list(thread_id))
                         # print("summary length successful")
                     # print(get_message_list(summary["thread_id"]))
                     if length > summary["length"]:
