@@ -24,7 +24,7 @@ def get_agents():
     return estaid_agent, summary_agent, summary_agent_thread
 
 
-async def make_message(thread_id, role, input_message):
+def make_message(thread_id, role, input_message):
     message = project.agents.messages.create(
     thread_id=thread_id,
     role=role,
@@ -32,7 +32,7 @@ async def make_message(thread_id, role, input_message):
     # print("make message successful with message", input_message)
 
 
-def get_message_list(thread_id):
+async def get_message_list(thread_id):
     runs = list(project.agents.runs.list(thread_id=thread_id))
     if len(list(runs)) != 0:
         latest_run = list(runs)[0]
@@ -42,7 +42,7 @@ def get_message_list(thread_id):
                 run_id=latest_run.id
             )
             if latest_run.status in ("in_progress", "queued"):
-                asyncio.sleep(0.5)
+                await asyncio.sleep(0.5)
             else:
                 break
     messages = list(project.agents.messages.list(
@@ -66,7 +66,7 @@ async def run_agent(thread_id, agent_id):
                 run_id=latest_run.id
             )
             if latest_run.status in ("in_progress", "queued"):
-                asyncio.sleep(0.5)
+                await asyncio.sleep(0.5)
             else:
                 break
 
