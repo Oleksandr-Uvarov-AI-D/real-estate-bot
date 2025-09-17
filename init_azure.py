@@ -42,8 +42,10 @@ async def get_message_list(thread_id):
                 run_id=latest_run.id
             )
             if latest_run.status in ("in_progress", "queued"):
+                print(latest_run.status, "if, getmsg")
                 await asyncio.sleep(0.5)
             else:
+                print(latest_run.status, "else, getmsg")
                 break
     messages = list(project.agents.messages.list(
         thread_id=thread_id,
@@ -66,8 +68,10 @@ async def run_agent(thread_id, agent_id):
                 run_id=latest_run.id
             )
             if latest_run.status in ("in_progress", "queued"):
+                print(latest_run.status, "if, runagent")
                 await asyncio.sleep(0.5)
             else:
+                print(latest_run.status, "else, runagent")
                 break
 
     run = project.agents.runs.create_and_process(
