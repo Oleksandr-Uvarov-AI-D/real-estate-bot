@@ -60,7 +60,7 @@ async def set_up_a_360_webhook():
 async def delete_old_conversations():
     """Delete a trace of thread_id if the last message of a given conversation was >= 30 days ago."""
     # conversation_TTL = 86400 * 30
-    conversation_TTL = 100
+    conversation_TTL = 500
     while True:
         # print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
