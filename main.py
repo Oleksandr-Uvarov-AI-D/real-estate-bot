@@ -59,8 +59,8 @@ async def set_up_a_360_webhook():
 
 async def delete_old_conversations():
     """Delete a trace of thread_id if the last message of a given conversation was >= 30 days ago."""
-    # conversation_TTL = 86400 * 30
-    conversation_TTL = 500
+    conversation_TTL = 86400 * 30
+    # conversation_TTL = 500
     while True:
         # print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
@@ -75,7 +75,7 @@ async def delete_old_conversations():
 async def update_thread_summaries():
     # summary_update_time = 7200
     summary_update_time = 60
-    # time_to_get_dormant = 86400
+    # time_to_get_dormant = 1200
     time_to_get_dormant = 100
     while True:
         # print("summary update executed")
@@ -173,7 +173,7 @@ async def root():
 
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def home():
-    return "<h1>AI-D Chatbot API is running! </h1><p>Use POST /chat to talk to the bot.</p>"
+    return "<h1>Real-EstAID Chatbot API is running!"
 
 @app.post("/formspree")
 async def receive_user_submission(request: Request, background_tasks: BackgroundTasks):

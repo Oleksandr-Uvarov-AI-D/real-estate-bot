@@ -24,8 +24,8 @@ def toggle_dormant(table_name, thread_id, toggle_to):
         summary_id = summary_data[0]["id"]
 
         response = (
-    supabase.table("real_estaid_summaries")
-    .update({"dormant": toggle_to}) # dormant
-    .eq("id", summary_id)
-    .execute()) 
+        supabase.table("real_estaid_summaries")
+        .update({"dormant": toggle_to})
+        .eq("id", summary_id)
+        .execute()) 
 
