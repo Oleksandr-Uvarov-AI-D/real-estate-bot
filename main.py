@@ -99,10 +99,11 @@ async def update_thread_summaries():
             for summary in summaries:
                 last_time_updated = summary["last_time_updated"]
                 if time.time() - last_time_updated > conversation_TTL:
-                    summary["archived"] = True
+                    summary_id = summary["id"]
                     response = (
                         supabase.table("real_estaid_summaries")
-                        .update(summary)
+                        .update({"archived": True})
+                        .eq("id", summary_id)
                         .execute()) 
 
 
