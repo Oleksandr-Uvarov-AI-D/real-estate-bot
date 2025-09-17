@@ -224,8 +224,8 @@ async def handle_formspree_submission(first_name, last_name, email, phone_number
 
     today = get_today_date()
     sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie\nUser: Mijn voornaam is {first_name} en mijn achternaam is {last_name}. Mijn email is {email} en mijn telefoonnummer is {phone_number}"
-    make_message(thread_id, "user", sys_msg)
-    run_agent(thread_id, real_estaid_agent.id)
+    await make_message(thread_id, "user", sys_msg)
+    await run_agent(thread_id, real_estaid_agent.id)
 
     insert_message = (
         supabase.table("real_estaid_messages")
@@ -308,9 +308,9 @@ async def send_message_to_render(request: Request):
             # That is, the user started this conversation by contacting the bot directly without sending a form.
             today = get_today_date()
             sys_msg = f"System message: Vandaag is {today[0]}, {today[1]}, {today[2]}. Gebruik deze datum altijd als referentie."
-            make_message(thread_id, "user", sys_msg)
+            await make_message(thread_id, "user", sys_msg)
 
-            run_agent(thread_id, real_estaid_agent.id)
+            await run_agent(thread_id, real_estaid_agent.id)
 
             insert_message = (
             supabase.table("real_estaid_messages")
@@ -342,9 +342,9 @@ async def send_message_to_render(request: Request):
 async def send_message_to_ai(thread_id, phone_number, message):
     # print(threads_without_summaries, "threads without summaries in send message")
     # print("Sending message to AI with message: ", message)
-    make_message(thread_id, "user", message)
+    await make_message(thread_id, "user", message)
     
-    run_agent(thread_id, real_estaid_agent.id)
+    await run_agent(thread_id, real_estaid_agent.id)
 
     messages = get_message_list(thread_id)
 
@@ -403,11 +403,11 @@ async def make_summary(thread_id):
         # print("conversation not empty block start")
 
         # Make a message with conversation as value (summary agent)
-        make_message(summary_thread.id, "user", conversation)
+        await make_message(summary_thread.id, "user", conversation)
         # print("make summary make message successful")
 
         # Pass the message onto summary agent
-        run = run_agent(summary_thread.id, summary_agent.id)
+        run = await run_agent(summary_thread.id, summary_agent.id)
         # print("make summary run successful")
         # print(summary_thread.id, "summary thread id")
 
