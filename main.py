@@ -33,9 +33,8 @@ key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 conversations = {} 
-conversation_data = {}
 threads_without_summaries = {}
-submissions = {}
+form_submissions = {}
 
 async def set_up_a_360_webhook():
     url = WEBHOOK_360_URL
@@ -55,9 +54,10 @@ async def set_up_a_360_webhook():
     return Response(status_code=200)
 
 
+# conversation_TTL = 86400 * 30
+conversation_TTL = 100
 async def delete_old_conversations():
-    # conversation_TTL = 86400 * 30
-    conversation_TTL = 100
+    """Delete a trace of thread_id if the last message of a given conversation was >= 30 days ago."""
     while True:
         # print("conversation ttl executed")
         for phone_number in list(conversations.keys()):
@@ -92,12 +92,21 @@ async def update_thread_summaries():
             summaries = (
                 supabase.table("real_estaid_summaries")
                 .select("*")
+                .eq("archived", False)
                 .execute()).data
             
             count = 0 
             for summary in summaries:
-                count += 1
                 last_time_updated = summary["last_time_updated"]
+                if time.time() - last_time_updated > conversation_TTL:
+                    summary["archived"] = True
+                    response = (
+                        supabase.table("real_estaid_summaries")
+                        .update(summary)
+                        .execute()) 
+
+
+                count += 1
                 if time.time() - last_time_updated > summary_update_time:
                     # print("if successful", time.time() - last_time_updated)
                     thread_id = summary.get("thread_id", None)
@@ -175,12 +184,12 @@ async def receive_user_submission(request: Request, background_tasks: Background
     key_fields = {k: user_data[k] for k in ["firstName", "lastName", "email", "phone"]}
     submission_hash = hashlib.sha256(json.dumps(key_fields, sort_keys=True).encode()).hexdigest()
 
-    if submission_hash in submissions:
+    if submission_hash in form_submissions:
         time_now = time.time()
-        if time_now - submissions[submission_hash] < 300:
+        if time_now - form_submissions[submission_hash] < 300:
             return Response(status_code=200)
     
-    submissions[submission_hash] = time.time()
+    form_submissions[submission_hash] = time.time()
 
 
     first_name, last_name, email, phone_number = user_data["firstName"], user_data["lastName"], user_data["email"], user_data["phone"]
@@ -426,6 +435,7 @@ async def make_summary(thread_id):
         message_to_insert["thread_id"] = thread_id
         message_to_insert["length"] = length
         message_to_insert["last_time_updated"] = int(time.time())
+        message_to_insert["archived"] = False
 
 
         thread_msg = supabase.table("real_estaid_summaries").select("*").eq("thread_id", thread_id).execute().data
