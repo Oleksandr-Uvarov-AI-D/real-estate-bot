@@ -76,7 +76,6 @@ async def update_thread_summaries():
     # summary_update_time = 7200
     summary_update_time = 60
     # time_to_get_dormant = 1200
-    time_to_get_dormant = 100
     while True:
         # print("summary update executed")
         try:
@@ -98,6 +97,7 @@ async def update_thread_summaries():
                 supabase.table("real_estaid_summaries")
                 .select("*")
                 .eq("dormant", False)
+                .eq("agent_id", real_estaid_agent.id)
                 .execute()).data
             
             for summary in summaries:
