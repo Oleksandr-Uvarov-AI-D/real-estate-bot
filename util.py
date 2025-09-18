@@ -105,5 +105,3 @@ def extract_json(s: str):
     json_str = s[start:end+1]
     return json.loads(json_str)
 
-
-print(get_today_date())

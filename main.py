@@ -97,7 +97,6 @@ async def update_thread_summaries():
                 supabase.table("real_estaid_summaries")
                 .select("*")
                 .eq("dormant", False)
-                .eq("agent_id", real_estaid_agent.id)
                 .execute()).data
             
             for summary in summaries:
@@ -378,6 +377,7 @@ async def make_summary(thread_id):
         supabase.table("real_estaid_messages")
         .select("role, message")
         .eq("thread_id", thread_id)
+        .eq("agent_id", real_estaid_agent.id)
         .order("id", desc=True)
         .limit(100)
         .execute()
